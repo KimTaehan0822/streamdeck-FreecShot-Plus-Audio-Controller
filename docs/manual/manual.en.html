@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Web-Socket Audio Controller Stream Deck Plugin Manual</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<h1>Web-Socket Audio Controller Stream Deck Plugin Manual</h1>
+<p><time datetime="2026-11-08">2026-11-08</time></p>
+<p>A plugin that controls the volume, mute, monitoring and balance of the OBS audio mixer from a Stream Deck, and shows level meters on the keys and dial screens.</p>
+<p>Made by <strong>Kimtan2 (김탄2) of Doctor Goblin (닥터고블린)</strong>.</p>
+
+<section><h2>What you need</h2>
+<table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody>
+<tr><td>Computer</td><td>Windows 10 or later</td></tr>
+<tr><td>Stream Deck app</td><td>Stream Deck software 7.3 or later</td></tr>
+<tr><td>OBS</td><td>OBS Studio 30 or later (includes obs-websocket 5)</td></tr>
+<tr><td>Installer</td><td>A <code>.streamDeckPlugin</code> file (e.g. <code>Web-Socket-Audio-Controller.streamDeckPlugin</code>)</td></tr>
+</tbody></table>
+<p>With a Stream Deck + you can also use the dial actions (VU Dial, Balance Dial). Other Stream Decks use the key actions only.</p>
+</section>
+
+<section><h2>Step 1: Install the plugin</h2>
+<ol>
+<li><p>Double-click the <code>.streamDeckPlugin</code> file.</p></li>
+<li><p>The Stream Deck app opens and asks whether to install it. Click <strong>Install</strong>.</p></li>
+<li><p>If it is already installed, it may ask to replace it. Choose install again.</p></li>
+<li><p>Check that the <strong>Web-Socket Audio Controller</strong> category appears in the action list on the right of the Stream Deck app.</p></li>
+</ol>
+</section>
+
+<section><h2>Step 2: Turn on WebSocket in OBS</h2>
+<p>The plugin talks to OBS through its built-in <strong>WebSocket</strong> server. Set this up once in OBS.</p>
+<ol>
+<li><p>Open <strong>Tools → WebSocket Server Settings</strong> in OBS.</p></li>
+<li><p>Turn on <strong>Enable WebSocket server</strong>.</p></li>
+<li><p>Check the <strong>Server Port</strong>. The default is <code>4455</code>.</p></li>
+<li><p>If <strong>Enable Authentication</strong> is on, click <strong>Show Connect Info</strong> and note the <strong>Server Password</strong> for step 3.</p></li>
+<li><p>Click <strong>OK</strong> to close the window.</p></li>
+</ol>
+</section>
+
+<section><h2>Step 3: Connect the plugin</h2>
+<p>If authentication is off in OBS, the plugin's defaults work as they are. If it is on, you only need to enter the password.</p>
+<ol>
+<li><p>Drag any action from <strong>Web-Socket Audio Controller</strong> onto a key and click it.</p></li>
+<li><p>At the very bottom of the settings screen, click <strong>▶ OBS connection (WebSocket)</strong> to unfold it. (It is folded by default.)</p></li>
+<li><p>Check or change the values. They apply to every action.</p></li>
+</ol>
+<table><thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Host</td><td><code>127.0.0.1</code></td><td>Address of the PC running OBS (keep it for the same PC)</td></tr>
+<tr><td>Port</td><td><code>4455</code></td><td>Must match the OBS Server Port</td></tr>
+<tr><td>Password</td><td>empty</td><td>The OBS password, if authentication is on</td></tr>
+</tbody></table>
+<p>Changes reconnect right away; no restart is needed. While OBS is not running the keys show <strong>OFFLINE</strong>, and the plugin retries every 3 seconds.</p>
+<p><strong>Changing the language:</strong> unfold <strong>▶ Language</strong> at the bottom of the same screen and pick English / 한국어 / 日本語. The settings screen and the text on the keys (MUTED, OFFLINE and so on) change at once, for every action. The default is English; action names in the action list do not change.</p>
+<p><strong>How to tell it is connected:</strong> no key shows OFFLINE, and the <strong>Source</strong> list on the settings screen shows your OBS audio sources (e.g. Mic/Aux, Desktop Audio).</p>
+</section>
+
+<section><h2>Step 4: Make your first key</h2>
+<p>This example mutes your microphone with one key. It works on every Stream Deck.</p>
+<ol>
+<li><p>Drag <strong>Web-Socket Audio Controller → Mute</strong> onto an empty key.</p></li>
+<li><p>Click the key and pick your microphone in <strong>Source</strong>. Sources without audio (images, browsers and so on) are not listed.</p></li>
+<li><p>Each press turns mute on or off. While muted the key turns red, with the source name and <strong>MUTED</strong> in the middle.</p></li>
+</ol>
+<p>Renaming the source in OBS keeps the key working.</p>
+</section>
+
+<section><h2>A volume fader on two keys</h2>
+<p>This example raises and lowers the microphone volume with two keys. It works on every Stream Deck.</p>
+<ol>
+<li><p>Drag <strong>Fader(2-Button)</strong> onto two keys, one directly above the other.</p></li>
+<li><p>Click the top key, pick the microphone in <strong>Source</strong> and <strong>Top (up)</strong> in <strong>Role</strong>.</p></li>
+<li><p>Give the bottom key the same source, and <strong>Bottom (down)</strong> in <strong>Role</strong>.</p></li>
+<li><p>The top key raises the volume by 1 dB, the bottom key lowers it by 1 dB. Hold a key to keep moving. Change the amount in <strong>Step (dB)</strong> (e.g. 0.5, 2).</p></li>
+</ol>
+<p>For two keys side by side, pick <strong>Left (down)</strong> and <strong>Right (up)</strong> as the roles.</p>
+<p><strong>Reading the keys (stacked vertically):</strong></p>
+<ul>
+<li><p>Top of the upper key: source name and current volume</p></li>
+<li><p>Bottom of the lower key: current audio level</p></li>
+<li><p>Two bars (L/R): the incoming level, running across both keys, on the OBS scale of −60 to 0 dB</p></li>
+<li><p>Blue line inside the bars: volume (fader) position</p></li>
+<li><p>MUTED: the source is muted (the bars keep moving in grey)</p></li>
+</ul>
+<p>The source name always takes one line so every fader has the same size. Long names end in …; enter a short name in <strong>Display name</strong>. This action cannot mute; add a Mute key for that.</p>
+</section>
+
+<section><h2>With a Stream Deck +: VU Dial</h2>
+<p>This example controls the microphone volume with a Stream Deck + dial.</p>
+<ol>
+<li><p>Drag <strong>VU Dial</strong> onto a dial slot.</p></li>
+<li><p>Pick the microphone in <strong>Source</strong>.</p></li>
+<li><p>Each tick changes the volume by 1 dB. Change the amount in <strong>Step per tick (dB)</strong> (e.g. 0.5, 2). Pressing the dial toggles mute.</p></li>
+</ol>
+<p><strong>Reading the screen:</strong></p>
+<ul>
+<li><p>Top: source name</p></li>
+<li><p>Two bars (L/R): the incoming level (green → yellow → red)</p></li>
+<li><p>Blue line inside the bars: volume position</p></li>
+<li><p>Bottom left / right: audio level / volume</p></li>
+<li><p>MUTED: the source is muted</p></li>
+</ul>
+<p>Tapping the screen also mutes. If that happens by accident, turn off <strong>Touch tap mutes</strong>. The level at the bottom left can show L and R separately (<code>L -14.0 R -18.0</code>) or one value (<strong>Combined</strong>, <code>-14.0 dB</code>); choose in <strong>Level text</strong>.</p>
+<p><strong>Changing the press actions:</strong> unfold <strong>▶ Press actions</strong> on the settings screen. (It is folded by default.)</p>
+<ul>
+<li><p><strong>Press:</strong> press and release. <strong>Mute toggle</strong> (default) or <strong>Recall volume</strong></p></li>
+<li><p><strong>Press + turn left / right:</strong> turning while pressed. <strong>Step volume</strong> (default), Mute toggle, Mute on, Mute off, Recall volume</p></li>
+<li><p>With Recall volume, a <strong>Recall volume (dB)</strong> field appears below it. Enter the volume to go back to (e.g. −20).</p></li>
+</ul>
+<p>If you turned the dial while pressing, the press action does not run on release.</p>
+</section>
+
+<section><h2>Action list</h2>
+<p>Key actions work on every Stream Deck; dial actions need a Stream Deck +.</p>
+<table><thead><tr><th>Action</th><th>Type</th><th>What it does</th></tr></thead><tbody>
+<tr><td>VU Dial</td><td>Dial</td><td>Turn for volume (1 dB per tick by default), press or tap to mute, shows a level meter</td></tr>
+<tr><td>Balance Dial</td><td>Dial</td><td>Turn to move the balance by 1 as shown (e.g. L 40 → L 39), press to centre</td></tr>
+<tr><td>Fader(2-Button)</td><td>2 keys</td><td>Raise/lower the volume with two keys (1 dB per press by default), meter across both keys</td></tr>
+<tr><td>Mute</td><td>Key</td><td>Mute on/off. Red while muted</td></tr>
+<tr><td>Volume</td><td>Key</td><td>Set the volume to a value (Set to) or move it by an amount (Step by). Shows a meter</td></tr>
+<tr><td>Push to talk / Push to mute</td><td>Key</td><td>Sound goes out (talk) or is blocked (mute) only while held</td></tr>
+<tr><td>Talkback</td><td>Key</td><td>Mutes or lowers other sources at once; release (or press again) to put them back</td></tr>
+<tr><td>Audio monitoring</td><td>Key</td><td>Switch audio monitoring between off / monitor only / monitor and output</td></tr>
+<tr><td>Balance</td><td>Key</td><td>Set the balance to a value or move it by an amount</td></tr>
+</tbody></table>
+<p>Keys that repeat while held (Fader(2-Button), Volume and Balance in Step by) can be stopped by pressing the key once more if a repeat does not stop.</p>
+</section>
+
+<section><h2>Volume and Balance keys</h2>
+<p><strong>Volume:</strong> choose in <strong>Mode</strong>.</p>
+<ul>
+<li><p><strong>Set to:</strong> sets the volume to <strong>Volume (dB)</strong> (e.g. −20).</p></li>
+<li><p><strong>Step by:</strong> moves the volume by that amount (e.g. 1 or −1). Hold to keep moving.</p></li>
+</ul>
+<p>The range matches the OBS slider: −∞ to 0 dB. Going below −60 dB gives −∞ (silent); going up from −∞ gives −60 dB.</p>
+<p><strong>Balance:</strong> choose in <strong>Mode</strong> and enter a value in <strong>Balance</strong>.</p>
+<ul>
+<li><p><strong>Set to:</strong> −100 = L 100, 0 = centre, 100 = R 100 (e.g. −40 → L 40)</p></li>
+<li><p><strong>Step by:</strong> 5 = 5 to the right, −5 = 5 to the left</p></li>
+</ul>
+</section>
+
+<section><h2>Push to talk / Push to mute</h2>
+<ol>
+<li><p>Put <strong>Push to talk / Push to mute</strong> on a key and pick the microphone in <strong>Source</strong>.</p></li>
+<li><p>Choose in <strong>Mode</strong>. <strong>Push to talk</strong> lets sound out only while held; <strong>Push to mute</strong> blocks it only while held.</p></li>
+<li><p><strong>Release delay (ms):</strong> how long to wait after release before switching back (default 200 ms, like OBS's PTT). It keeps the end of a sentence from being cut.</p></li>
+</ol>
+<p>The key shows the source name and its mode (<strong>Push to talk</strong> or <strong>Push to mute</strong>). It is green while sound goes out; the text is red while it is blocked.</p>
+<ul>
+<li><p>The key remembers the mute state at the moment you press it and goes back to <strong>that state</strong> on release. Push to mute on an already-muted microphone does not unmute it on release.</p></li>
+<li><p>Switching pages while holding puts it back at once. Releasing while OBS is disconnected puts it back the moment it reconnects.</p></li>
+<li><p>It does not work inside a Multi Action: the release is not reliable there, and the microphone could stay on.</p></li>
+</ul>
+</section>
+
+<section><h2>Talkback</h2>
+<p>A key that lowers music or game audio all at once while you talk.</p>
+<ol>
+<li><p>Put <strong>Talkback</strong> on a key.</p></li>
+<li><p>Choose in <strong>Target</strong>: <strong>All except the list</strong> lowers every source except those in the list (usually your microphone); <strong>Only the list</strong> lowers only the listed sources.</p></li>
+<li><p>Click <strong>+ Add Source</strong> to add sources one row at a time. Remove a row with its ×.</p></li>
+<li><p>Choose how to lower them in <strong>Style</strong>.</p></li>
+<li><p>Choose <strong>While held</strong> or <strong>Toggle</strong> (press once to turn on, again to turn off) in <strong>Behavior</strong>.</p></li>
+</ol>
+<table><thead><tr><th>Style</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Mute</td><td>Mutes the target sources</td></tr>
+<tr><td>Set volume</td><td>Lowers them to <strong>Volume (dB)</strong> (default −30). Sources already quieter stay as they are</td></tr>
+<tr><td>Talkback</td><td>Lowers them by <strong>Lower by (dB)</strong> from their current volume (default 15)</td></tr>
+</tbody></table>
+<ul>
+<li><p>The key turns orange while on. Sources that are already muted are left alone.</p></li>
+<li><p>Turning it off puts every source back to <strong>its value from before the press</strong>.</p></li>
+<li><p>If several Talkback keys hold the same source, turning one off also turns off the others holding that source, and their keys show off.</p></li>
+<li><p>The original values survive a restart of the Stream Deck app or the PC. While held is put back as soon as OBS connects; Toggle stays on.</p></li>
+<li><p><strong>Deleting a key while its Toggle is on leaves the sources lowered</strong>, so turn it off first.</p></li>
+<li><p>Inside a Multi Action only Toggle works.</p></li>
+</ul>
+</section>
+
+<section><h2>Audio monitoring</h2>
+<p>Switches the <strong>Audio Monitoring</strong> setting from OBS's Advanced Audio Properties. Choose in <strong>Mode</strong>.</p>
+<table><thead><tr><th>Mode</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Set to</td><td>Sets the value chosen in <strong>Monitoring</strong> (Monitor off / Monitor only / Monitor and output)</td></tr>
+<tr><td>Toggle with off</td><td>Each press switches between off and the chosen value</td></tr>
+<tr><td>Cycle</td><td>Each press goes off → monitor only → monitor and output</td></tr>
+</tbody></table>
+<p>The key shows the source name and the current monitoring; it turns blue while monitoring is on.</p>
+</section>
+
+<section><h2>Meter settings</h2>
+<p>Actions with a meter (VU Dial, Fader(2-Button), Volume) have <strong>Meter style</strong>. Match OBS <strong>Settings → Audio → Peak Meter Type</strong>.</p>
+<table><thead><tr><th>Meter style</th><th>OBS setting</th><th>Colour ranges</th></tr></thead><tbody>
+<tr><td>Standard</td><td>Sample Peak</td><td>yellow from −20 dB, red from −9 dB</td></tr>
+<tr><td>Wide green</td><td>True Peak</td><td>yellow from −13 dB, red from −2 dB</td></tr>
+</tbody></table>
+<p>OBS sends the plugin sample-peak values only, so Wide green matches OBS in its colour ranges only; loud peaks may read slightly lower than in OBS. Like OBS, the meter falls back gradually and shows a peak-hold mark for 20 seconds.</p>
+</section>
+
+<section><h2>Changing what a key shows</h2>
+<p><strong>Renaming the source:</strong> enter a name in <strong>Display name</strong> on the settings screen. Empty shows the OBS source name. The Stream Deck app's own title would overlap the plugin's text, so rename with Display name.</p>
+<p><strong>A different look for each state:</strong> the Mute, Push to talk / Push to mute, Talkback and Audio monitoring keys have two states.</p>
+<ol>
+<li><p>Click the key in the Stream Deck app.</p></li>
+<li><p>Find the two dots under the icon. The table below shows which state each dot is.</p></li>
+<li><p>Click a dot, then set the icon and title for that state.</p></li>
+</ol>
+<table><thead><tr><th>Key</th><th>Left dot</th><th>Right dot</th></tr></thead><tbody>
+<tr><td>Mute</td><td>the source's sound is going out</td><td>the source's sound is off (muted)</td></tr>
+<tr><td>Talkback</td><td>the other sources sound as usual</td><td>the other sources are off or lowered (Talkback on)</td></tr>
+<tr><td>Push to talk</td><td>the source's sound is going out (while pressed)</td><td>the source's sound is off (usually while not pressed)</td></tr>
+<tr><td>Push to mute</td><td>the source's sound is going out (usually while not pressed)</td><td>the source's sound is off (while pressed)</td></tr>
+<tr><td>Audio monitoring</td><td>monitoring is off</td><td>monitoring is on (monitor only, or monitor and output)</td></tr>
+</tbody></table>
+<p>With a title set, the plugin hides its own name and status text (the background colour stays). While your own icon is shown, signs such as OFFLINE may not be visible. If you see only one dot, the key was placed with an older version; delete it and drag it in again from the action list.</p>
+</section>
+
+<section><h2>Signs on the keys and troubleshooting</h2>
+<p>If a key or dial shows one of these, check the right-hand column in order.</p>
+<table><thead><tr><th>Sign / symptom</th><th>Meaning</th><th>What to do</th></tr></thead><tbody>
+<tr><td>OFFLINE</td><td>Not connected to OBS</td><td>Check that OBS is running → WebSocket server enabled → port 4455 → password</td></tr>
+<tr><td>SET SOURCE</td><td>No source chosen yet</td><td>Click the action and pick a Source</td></tr>
+<tr><td>SETUP</td><td>Another required setting is empty</td><td>Fill in the empty fields (Mode, value and so on)</td></tr>
+<tr><td>N/A</td><td>The chosen source is not in OBS (deleted)</td><td>Pick another source</td></tr>
+<tr><td>Level bars do not move</td><td>No audio is coming into that source</td><td>Check that its meter moves in the OBS audio mixer</td></tr>
+<tr><td>Source list is empty</td><td>Not connected yet</td><td>The list fills once connected. If not, see OFFLINE</td></tr>
+<tr><td>A repeat does not stop</td><td>The key release was missed</td><td>Press that key once more</td></tr>
+<tr><td>Still quiet after Talkback</td><td>The key was deleted while on, or OBS disconnected</td><td>Check the OBS connection. If the key was deleted, restore the volume in OBS</td></tr>
+</tbody></table>
+</section>
+
+<section><h2>Contact</h2>
+<p>If you have a problem or a question, contact the author (Kimtan2 / 김탄2).</p>
+<ul>
+<li><p><strong>Discord:</strong> kimtan2</p></li>
+<li><p><strong>Chzzk (치지직):</strong> 김탄2</p></li>
+</ul>
+<p>OBS and OBS Studio are trademarks of the OBS Project. This plugin is an unofficial project, not affiliated with the OBS Project.</p>
+</section>
+</body>
+</html>

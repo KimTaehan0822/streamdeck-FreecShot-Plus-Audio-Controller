@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<style>
+		.tb-row { display: flex; gap: 4px; margin-bottom: 4px; }
+		.tb-row select { flex: 1; min-width: 0; height: 24px; background: #3d3d3d; color: #d8d8d8; border: none; border-radius: 3px; }
+		.tb-btn { background: #3d3d3d; color: #d8d8d8; border: none; border-radius: 3px; padding: 2px 8px; cursor: pointer; }
+		.tb-btn:hover, .tb-btn:focus-visible { background: #4a4a4a; }
+	</style>
+	<div id="fields"></div>
+	<hr />
+	<div data-global></div>
+	<script src="i18n.js"></script>
+	<script src="common.js"></script>
+	<script>
+		// One PI for every action; the action UUID picks the fields.
+		const METER = ['vu-dial', 'button-fader', 'volume']
+
+		// Built per render so they follow the language.
+		const PRESS = () => ({ mute: tr('muteToggle'), recall: tr('recall') })
+		const TURN = () => ({ step: tr('stepVolume'), muteToggle: tr('muteToggle'), muteOn: tr('muteOn'), muteOff: tr('muteOff'), recall: tr('recall') })
+		// [action setting, dB setting, label key, choices, default]
+		const PRESS_SLOTS = () => [
+			['pressAction', 'pressDb', 'press', PRESS(), 'mute'],
+			['leftAction', 'leftDb', 'pressLeft', TURN(), 'step'],
+			['rightAction', 'rightDb', 'pressRight', TURN(), 'step'],
+		]
+
+		const select = (setting, label, items, def) =>
+			`<sdpi-item label="${label}"><sdpi-select setting="${setting}" default="${def}">${Object.entries(items)
+				.map(([value, text]) => `<option value="${value}">${text}</option>`)
+				.join('')}</sdpi-select></sdpi-item>`
+		const text = (setting, label, placeholder, def = '') =>
+			`<sdpi-item label="${label}"><sdpi-textfield setting="${setting}"${def ? ` default="${def}"` : ''} placeholder="${placeholder}"></sdpi-textfield></sdpi-item>`
+		const hint = (t) => `<div class="hint">${t}</div>`
+		// A field shown only while a select has one of the given values.
+		const when = (setting, values, html) => `<div data-when="${setting}" data-values="${values}">${html}</div>`
+
+		function talkbackFields() {
+			let html = text('displayName', tr('displayName'), tr('talkbackNameHint'))
+			html += select('scope', tr('target'), { except: tr('except'), only: tr('only') }, 'except')
+			html += `<sdpi-item label="${tr('sources')}"><div id="tb-rows"></div></sdpi-item>`
+			html += `<sdpi-item label=""><button id="tb-add" class="tb-btn">+ ${tr('addSource')}</button></sdpi-item>`
+			html += select('style', tr('style'), { mute: tr('styleMute'), level: tr('styleLevel'), duck: tr('styleDuck') }, 'mute')
+			html += when('style', 'level', text('levelDb', tr('levelDb'), tr('levelDbHint'), '-30'))
+			html += when('style', 'duck', text('duckDb', tr('duckDb'), tr('duckDbHint'), '15'))
+			html += select('behavior', tr('behavior'), { hold: tr('hold'), toggle: tr('toggle') }, 'hold')
+			html += hint(tr('talkbackHint'))
+			return html
+		}
+
+		// Talkback source list: one row per source (dropdown + x), "Add Source" adds a row. Saved as settings.sources =
+		// [{ uuid, name }]; the name keeps a row readable while OBS is offline or the source is gone.
+		let tbInputs = []
+		let tbSubscribed = false
+		async function setupTalkbackList() {
+			const client = SDPIComponents.streamDeckClient
+			const read = async () => {
+				const s = (await client.getSettings()).settings || {}
+				return Array.isArray(s.sources) ? s.sources.filter((r) => r && typeof r === 'object') : []
+			}
+			// Merge into the current settings, then re-read so the other fields' copy of the settings includes the list.
+			const write = async (rows) => {
+				const s = (await client.getSettings()).settings || {}
+				await client.setSettings({ ...s, sources: rows })
+				await client.getSettings()
+			}
+			const draw = (rows) => {
+				const box = document.getElementById('tb-rows')
+				if (!box) return
+				box.innerHTML = ''
+				const shown = rows.length ? rows : [{ uuid: '', name: '' }]
+				shown.forEach((row, i) => {
+					const line = document.createElement('div')
+					line.className = 'tb-row'
+					const sel = document.createElement('select')
+					const options = [{ value: '', label: tr('selectSource') }, ...tbInputs]
+					if (row.uuid && !tbInputs.some((o) => o.value === row.uuid)) options.push({ value: row.uuid, label: `${row.name || row.uuid} ${tr('notFound')}` })
+					for (const o of options) {
+						const opt = document.createElement('option')
+						opt.value = o.value
+						opt.textContent = o.label
+						sel.append(opt)
+					}
+					sel.value = row.uuid || ''
+					sel.addEventListener('change', async () => {
+						const cur = await read()
+						cur[i] = { uuid: sel.value, name: tbInputs.find((o) => o.value === sel.value)?.label || '' }
+						await write(cur)
+					})
+					const del = document.createElement('button')
+					del.className = 'tb-btn'
+					del.textContent = '×'
+					del.title = tr('remove')
+					del.addEventListener('click', async () => {
+						const cur = await read()
+						cur.splice(i, 1)
+						await write(cur)
+						draw(cur)
+					})
+					line.append(sel, del)
+					box.append(line)
+				})
+			}
+			document.getElementById('tb-add').addEventListener('click', async () => {
+				const cur = await read()
+				// The empty row shown for an empty list counts as the first row.
+				if (!cur.length) cur.push({ uuid: '', name: '' })
+				cur.push({ uuid: '', name: '' })
+				await write(cur)
+				draw(cur)
+			})
+			if (!tbSubscribed) {
+				tbSubscribed = true
+				// The plugin answers with OBS's audio sources and sends the list again whenever it changes.
+				client.sendToPropertyInspector.subscribe(async (ev) => {
+					if (ev.payload?.event !== 'getInputs' || !Array.isArray(ev.payload.items)) return
+					tbInputs = ev.payload.items
+					draw(await read())
+				})
+			}
+			draw(await read())
+			client.send('sendToPlugin', { event: 'getInputs' })
+		}
+
+		function fieldsFor(kind) {
+			if (kind === 'talkback') return talkbackFields()
+			let html = `<sdpi-item label="${tr('source')}"><sdpi-select setting="inputUuid" datasource="getInputs" hot-reload placeholder="${tr('selectSource')}"></sdpi-select></sdpi-item>`
+			html += text('displayName', tr('displayName'), tr('displayNameHint'))
+			if (METER.includes(kind)) {
+				html += select('meterStyle', tr('meterStyle'), { standard: tr('standard'), wide: tr('wide') }, 'standard')
+				html += hint(tr('meterHint'))
+				// Only the dial draws L/R numbers; faders and keys show one combined value.
+				if (kind === 'vu-dial') html += select('channels', tr('levelText'), { lr: tr('lr'), combined: tr('combined') }, 'lr')
+			}
+			switch (kind) {
+				case 'vu-dial':
+					html += text('step', tr('stepTickDb'), tr('stepTickDbHint'), '1')
+					html += `<sdpi-item label="${tr('touchMute')}"><sdpi-checkbox setting="touchMute" default="true"></sdpi-checkbox></sdpi-item>`
+					// Folded like the connection block; a dB field shows only for Recall volume.
+					html += `<details class="connection"><summary>${tr('pressActions')}</summary>${PRESS_SLOTS().map(
+						([action, db, label, items, def]) => select(action, tr(label), items, def) + when(action, 'recall', text(db, tr('recallDb'), tr('recallDbHint'))),
+					).join('')}</details>`
+					break
+				case 'button-fader':
+					html += select('role', tr('role'), { top: tr('roleTop'), bottom: tr('roleBottom'), left: tr('roleLeft'), right: tr('roleRight') }, 'top')
+					html += hint(tr('faderHint'))
+					html += text('step', tr('stepDb'), '1', '1')
+					break
+				case 'volume':
+					html += select('mode', tr('mode'), { set: tr('setTo'), step: tr('stepBy') }, 'set')
+					html += text('value', tr('volumeDb'), tr('volumeHint'))
+					break
+				case 'ptt':
+					html += select('mode', tr('mode'), { talk: tr('pushToTalk'), mute: tr('pushToMute') }, 'talk')
+					html += text('releaseDelayMs', tr('releaseDelay'), '200', '200')
+					html += hint(tr('pttHint'))
+					break
+				case 'monitor':
+					html += select('mode', tr('mode'), { set: tr('setTo'), toggle: tr('toggleOff'), cycle: tr('cycle') }, 'set')
+					html += when(
+						'mode',
+						'set,toggle',
+						select('type', tr('monitoring'), { OBS_MONITORING_TYPE_NONE: tr('monitorOff'), OBS_MONITORING_TYPE_MONITOR_ONLY: tr('monitorOnly'), OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT: tr('monitorBoth') }, 'OBS_MONITORING_TYPE_NONE'),
+					)
+					break
+				case 'balance-dial':
+					html += text('step', tr('stepTick'), '1', '1')
+					break
+				case 'balance':
+					html += select('mode', tr('mode'), { set: tr('setTo'), step: tr('stepBy') }, 'set')
+					html += text('value', tr('balance'), tr('balanceHint'))
+					break
+			}
+			return html
+		}
+
+		let kind
+		// After picking a language the screen is redrawn; keep its folded block open so the choice stays in view.
+		let languageOpen = false
+		/** Draws the action's fields and the shared block in the current language, then loads saved values into them. */
+		async function render() {
+			const fields = document.getElementById('fields')
+			fields.innerHTML = fieldsFor(kind)
+			renderGlobal()
+			if (languageOpen) document.querySelector('sdpi-select[setting="language"]')?.closest('details')?.setAttribute('open', '')
+			await initFields(document.body)
+			if (kind === 'talkback') await setupTalkbackList()
+			for (const box of fields.querySelectorAll('[data-when]')) {
+				const sel = fields.querySelector(`sdpi-select[setting="${box.dataset.when}"]`)
+				const show = () => (box.hidden = !box.dataset.values.split(',').includes(sel.value))
+				sel.addEventListener('valuechange', show)
+				show()
+			}
+			// Picking a language redraws this screen in it (the plugin redraws the keys).
+			document.querySelector('sdpi-select[setting="language"]')?.addEventListener('valuechange', (ev) => {
+				const next = ev.target.value
+				if ((next === 'ko' || next === 'ja' ? next : 'en') === piLang) return
+				setPiLang(next)
+				languageOpen = true
+				render()
+			})
+		}
+
+		async function main() {
+			const client = SDPIComponents.streamDeckClient
+			const { actionInfo } = await client.getConnectionInfo()
+			kind = actionInfo.action.split('.').pop()
+			setPiLang((await client.getGlobalSettings())?.language)
+			await render()
+		}
+		main()
+	</script>
+</body>
+</html>

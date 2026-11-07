@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Web-Socket Audio Controller Stream Deck プラグイン 取扱説明書</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<h1>Web-Socket Audio Controller Stream Deck プラグイン 取扱説明書</h1>
+<p><time datetime="2026-11-08">2026-11-08</time></p>
+<p>Stream Deck から OBS 音声ミキサーの音量、ミュート、モニタリング、バランスを操作し、キーとダイヤルの画面でレベルメーターを表示するプラグインです。</p>
+<p>作者: <strong>ドクターゴブリン(닥터고블린)の Kimtan2(김탄2)</strong></p>
+
+<section><h2>必要なもの</h2>
+<table><thead><tr><th>項目</th><th>必要なもの</th></tr></thead><tbody>
+<tr><td>パソコン</td><td>Windows 10 以降</td></tr>
+<tr><td>Stream Deck アプリ</td><td>Stream Deck ソフトウェア 7.3 以降</td></tr>
+<tr><td>OBS</td><td>OBS Studio 30 以降 (obs-websocket 5 を内蔵)</td></tr>
+<tr><td>インストールファイル</td><td><code>.streamDeckPlugin</code> ファイル (例: <code>Web-Socket-Audio-Controller.streamDeckPlugin</code>)</td></tr>
+</tbody></table>
+<p>Stream Deck + があればダイヤルアクション(VU Dial、Balance Dial)も使えます。ほかの Stream Deck ではキーアクションのみ使えます。</p>
+</section>
+
+<section><h2>手順1: プラグインをインストール</h2>
+<ol>
+<li><p><code>.streamDeckPlugin</code> ファイルをダブルクリックします。</p></li>
+<li><p>Stream Deck アプリが開き、インストールするか確認されます。<strong>インストール</strong>を押します。</p></li>
+<li><p>すでにインストール済みの場合は上書きするか確認されることがあります。その場合もインストールを選びます。</p></li>
+<li><p>Stream Deck アプリ右側のアクション一覧に <strong>Web-Socket Audio Controller</strong> カテゴリーが追加されたことを確認します。</p></li>
+</ol>
+</section>
+
+<section><h2>手順2: OBS で WebSocket をオンにする</h2>
+<p>プラグインは OBS に内蔵された <strong>WebSocket</strong> サーバーを通して OBS とやり取りします。OBS で一度だけ設定します。</p>
+<ol>
+<li><p>OBS のメニュー <strong>ツール → WebSocket サーバー設定</strong>を開きます。</p></li>
+<li><p><strong>WebSocket サーバーを有効にする</strong>をオンにします。</p></li>
+<li><p><strong>サーバーポート</strong>を確認します。初期値は <code>4455</code> です。</p></li>
+<li><p><strong>認証を有効にする</strong>がオンなら、<strong>接続情報を表示</strong>を押して<strong>サーバーパスワード</strong>を控えておきます。手順3で使います。</p></li>
+<li><p><strong>OK</strong> を押して閉じます。</p></li>
+</ol>
+</section>
+
+<section><h2>手順3: プラグインを接続</h2>
+<p>OBS で認証をオフにしている場合、プラグイン側は初期値のままで動きます。オンにしている場合はパスワードだけ入力します。</p>
+<ol>
+<li><p><strong>Web-Socket Audio Controller</strong> のアクションをどれか一つキーにドラッグし、クリックします。</p></li>
+<li><p>下の設定画面のいちばん下にある <strong>▶ OBS connection (WebSocket)</strong> を押して開きます。(普段は閉じています)</p></li>
+<li><p>値を確認または変更します。ここでの変更はすべてのアクションに適用されます。</p></li>
+</ol>
+<table><thead><tr><th>項目</th><th>初期値</th><th>意味</th></tr></thead><tbody>
+<tr><td>Host</td><td><code>127.0.0.1</code></td><td>OBS が動いているパソコンのアドレス (同じパソコンならそのまま)</td></tr>
+<tr><td>Port</td><td><code>4455</code></td><td>OBS のサーバーポートと同じにする</td></tr>
+<tr><td>Password</td><td>空欄</td><td>OBS で認証をオンにしている場合、そのパスワード</td></tr>
+</tbody></table>
+<p>値を変えるとすぐに再接続します。Stream Deck を再起動する必要はありません。OBS が起動していないとキーに <strong>OFFLINE</strong> と表示され、3秒ごとに再接続を試みます。</p>
+<p><strong>言語の変更:</strong> 同じ設定画面のいちばん下の <strong>▶ Language</strong> を開き、English / 한국어 / 日本語 から選びます。選ぶとすぐに設定画面の文字とキーの文字(MUTED、OFFLINE など)が切り替わり、すべてのアクションに適用されます。初期値は English です。アクション一覧のアクション名は変わりません。</p>
+<p><strong>接続できたかの確認:</strong> キーに OFFLINE が表示されず、設定画面の <strong>Source</strong> 一覧に OBS の音声ソース名(例: マイク、デスクトップ音声)が出ていれば接続できています。</p>
+</section>
+
+<section><h2>手順4: 最初のキーを作る</h2>
+<p>キー一つでマイクをミュートする例です。すべての Stream Deck で使えます。</p>
+<ol>
+<li><p>アクション一覧の <strong>Web-Socket Audio Controller → Mute</strong> を空いているキーにドラッグします。</p></li>
+<li><p>キーをクリックし、下の設定画面の <strong>Source</strong> でマイクのソースを選びます。音声のないソース(画像、ブラウザなど)は一覧に出ません。</p></li>
+<li><p>押すたびにミュートがオン・オフします。ミュート中は赤い背景の中央にソース名と <strong>MUTED</strong>(日本語設定では<strong>ミュート</strong>)が表示されます。</p></li>
+</ol>
+<p>OBS でソース名を変えても、キーの設定はそのまま使えます。</p>
+</section>
+
+<section><h2>キー2つで音量フェーダーを作る</h2>
+<p>キー2つでマイクの音量を上げ下げする例です。すべての Stream Deck で使えます。</p>
+<ol>
+<li><p><strong>Fader(2-Button)</strong> を上下に並んだ2つのキーに一つずつドラッグします。</p></li>
+<li><p>上のキーをクリックし、<strong>Source</strong> でマイクを、<strong>Role</strong> で <strong>Top (up)</strong> を選びます。</p></li>
+<li><p>下のキーも同じソースを選び、<strong>Role</strong> だけ <strong>Bottom (down)</strong> にします。</p></li>
+<li><p>上のキーで音量が 1 dB 上がり、下のキーで 1 dB 下がります。押し続けると動き続けます。一度に動く量は <strong>Step (dB)</strong> で変えられます(例: 0.5、2)。</p></li>
+</ol>
+<p>左右に並べる場合は、<strong>Role</strong> を <strong>Left (down)</strong> と <strong>Right (up)</strong> にします。</p>
+<p><strong>画面の見方 (上下に並べた場合):</strong></p>
+<ul>
+<li><p>上のキーの上部: ソース名と現在の音量</p></li>
+<li><p>下のキーの下部: 現在の音声レベル</p></li>
+<li><p>2本のバー(L/R): 入ってくる音の大きさ。2つのキーにまたがってつながり、目盛りは OBS と同じ −60 〜 0 dB</p></li>
+<li><p>バーの中の青い線: 音量(フェーダー)の位置</p></li>
+<li><p>MUTED: ミュート中 (バーは灰色で動き続けます)</p></li>
+</ul>
+<p>フェーダーの大きさをそろえるため、ソース名は常に1行で表示します。長い名前は末尾が … になるので、<strong>Display name</strong> に短い名前を入れてください。このアクションではミュートできません。ミュートもキーで行うなら Mute アクションを追加してください。</p>
+</section>
+
+<section><h2>Stream Deck + の場合: VU Dial を作る</h2>
+<p>Stream Deck + のダイヤルでマイクの音量を調整する例です。</p>
+<ol>
+<li><p><strong>VU Dial</strong> をダイヤル枠にドラッグします。</p></li>
+<li><p>設定画面の <strong>Source</strong> でマイクを選びます。</p></li>
+<li><p>ダイヤルを1目盛り回すごとに音量が 1 dB 変わります。1目盛りの量は <strong>Step per tick (dB)</strong> で変えられます(例: 0.5、2)。押して離すとミュートがオン・オフします。</p></li>
+</ol>
+<p><strong>画面の見方:</strong></p>
+<ul>
+<li><p>上: ソース名</p></li>
+<li><p>2本のバー(L/R): 入ってくる音の大きさ (緑 → 黄 → 赤)</p></li>
+<li><p>バーの中の青い線: 音量の位置</p></li>
+<li><p>左下 / 右下: 音声レベル / 音量</p></li>
+<li><p>MUTED: ミュート中</p></li>
+</ul>
+<p>画面をタッチしてもミュートします。誤ってタッチしてしまう場合は <strong>Touch tap mutes</strong> をオフにしてください。左下のレベルは <strong>Level text</strong> で L/R 別々(<code>L -14.0 R -18.0</code>)か一つの値(<strong>Combined</strong>、<code>-14.0 dB</code>)を選べます。</p>
+<p><strong>押したときの動作を変える:</strong> 設定画面の <strong>▶ Press actions</strong> を押して開きます。(普段は閉じています)</p>
+<ul>
+<li><p><strong>Press:</strong> 押して離したとき。<strong>Mute toggle</strong>(初期値)または <strong>Recall volume</strong></p></li>
+<li><p><strong>Press + turn left / right:</strong> 押したまま左 / 右に回したとき。<strong>Step volume</strong>(初期値)、Mute toggle、Mute on、Mute off、Recall volume</p></li>
+<li><p>Recall volume を選ぶと、その下に <strong>Recall volume (dB)</strong> 欄が出ます。戻したい音量を入力します(例: −20)。</p></li>
+</ul>
+<p>押したまま回した場合、離したときの押下動作は実行されません。</p>
+</section>
+
+<section><h2>アクション一覧</h2>
+<p>キーはすべての Stream Deck で、ダイヤルは Stream Deck + でのみ使えます。</p>
+<table><thead><tr><th>アクション</th><th>種類</th><th>できること</th></tr></thead><tbody>
+<tr><td>VU Dial</td><td>ダイヤル</td><td>回して音量調整(初期値 1目盛り 1 dB)、押すかタッチでミュート、レベルメーター表示</td></tr>
+<tr><td>Balance Dial</td><td>ダイヤル</td><td>回すと左右バランスを表示値で 1 ずつ(例: L 40 → L 39)、押すと中央</td></tr>
+<tr><td>Fader(2-Button)</td><td>キー2つ</td><td>キー2つで音量を上げ下げ(初期値 1回 1 dB)、2つのキーにまたがるメーター表示</td></tr>
+<tr><td>Mute</td><td>キー</td><td>ミュートのオン・オフ。ミュート中は赤い背景</td></tr>
+<tr><td>Volume</td><td>キー</td><td>音量を指定値にする(Set to)か、指定量だけ上げ下げ(Step by)。メーター表示</td></tr>
+<tr><td>Push to talk / Push to mute</td><td>キー</td><td>押している間だけ音が出る(talk)か、止まる(mute)</td></tr>
+<tr><td>Talkback</td><td>キー</td><td>ほかのソースをまとめてミュートまたは下げ、離す(またはもう一度押す)と元に戻す</td></tr>
+<tr><td>Audio monitoring</td><td>キー</td><td>音声モニタリングをオフ / モニターのみ / モニターと出力 に切り替え</td></tr>
+<tr><td>Balance</td><td>キー</td><td>左右バランスを指定値にするか、指定量だけ動かす</td></tr>
+</tbody></table>
+<p>押し続けると繰り返すキー(Fader(2-Button)、Step by の Volume と Balance)は、繰り返しが止まらないときにそのキーをもう一度押すと止まります。</p>
+</section>
+
+<section><h2>Volume と Balance キー</h2>
+<p><strong>Volume:</strong> <strong>Mode</strong> で選びます。</p>
+<ul>
+<li><p><strong>Set to:</strong> <strong>Volume (dB)</strong> に入力した値にします(例: −20)。</p></li>
+<li><p><strong>Step by:</strong> 入力した量だけ上げ下げします(例: 1 または −1)。押し続けると動き続けます。</p></li>
+</ul>
+<p>音量の範囲は OBS のスライダーと同じ −∞ 〜 0 dB です。−60 dB より下げると −∞(無音)になり、−∞ から上げると −60 dB になります。</p>
+<p><strong>Balance:</strong> <strong>Mode</strong> を選び、<strong>Balance</strong> に値を入力します。</p>
+<ul>
+<li><p><strong>Set to:</strong> −100 = L 100、0 = 中央、100 = R 100 (例: −40 → L 40)</p></li>
+<li><p><strong>Step by:</strong> 5 = 右へ 5、−5 = 左へ 5</p></li>
+</ul>
+</section>
+
+<section><h2>Push to talk / Push to mute</h2>
+<ol>
+<li><p><strong>Push to talk / Push to mute</strong> をキーに置き、<strong>Source</strong> でマイクを選びます。</p></li>
+<li><p><strong>Mode</strong> で選びます。<strong>Push to talk</strong> は押している間だけ音が出て、<strong>Push to mute</strong> は押している間だけ音が止まります。</p></li>
+<li><p><strong>Release delay (ms):</strong> 離してから元に戻すまでの待ち時間です(初期値 200 ms、OBS の PTT と同じ)。言葉の終わりが切れないようにします。</p></li>
+</ol>
+<p>キーにはソース名と動作(<strong>Push to talk</strong> または <strong>Push to mute</strong>、日本語設定では<strong>押して話す</strong> / <strong>押してミュート</strong>)が表示されます。音が出ている間は緑の背景、止まっている間は文字が赤になります。</p>
+<ul>
+<li><p>押した瞬間のミュート状態を覚えておき、離すと<strong>押す前の状態</strong>に戻します。すでにミュートのマイクで Push to mute を押して離しても、マイクはオンになりません。</p></li>
+<li><p>押している間にページを切り替えるとすぐに戻します。OBS との接続が切れている間に離した場合は、再接続した瞬間に戻します。</p></li>
+<li><p>マルチアクションの中では動作しません。キーを離した信号が確実ではなく、マイクがオンのまま残るおそれがあるためです。</p></li>
+</ul>
+</section>
+
+<section><h2>Talkback (トークバック)</h2>
+<p>話している間、BGM やゲームの音をまとめて下げるキーです。</p>
+<ol>
+<li><p><strong>Talkback</strong> をキーに置きます。</p></li>
+<li><p><strong>Target</strong> で選びます。<strong>All except the list</strong> はリストのソース(普通は自分のマイク)以外すべて、<strong>Only the list</strong> はリストのソースだけを下げます。</p></li>
+<li><p><strong>+ Add Source</strong> を押して、ソースを1行ずつ追加します。行の右の × で削除します。</p></li>
+<li><p><strong>Style</strong> で下げ方を選びます。</p></li>
+<li><p><strong>Behavior</strong> で <strong>While held</strong>(押している間だけ)か <strong>Toggle</strong>(一度押すとオン、もう一度押すとオフ)を選びます。</p></li>
+</ol>
+<table><thead><tr><th>Style</th><th>できること</th></tr></thead><tbody>
+<tr><td>Mute</td><td>対象ソースをミュート</td></tr>
+<tr><td>Set volume</td><td><strong>Volume (dB)</strong> の音量まで下げる(初期値 −30)。すでにそれより小さいソースはそのまま</td></tr>
+<tr><td>Talkback</td><td>現在の音量から <strong>Lower by (dB)</strong> だけ下げる(初期値 15)</td></tr>
+</tbody></table>
+<ul>
+<li><p>オンの間はキーがオレンジ色になります。すでにミュートのソースには触れません。</p></li>
+<li><p>オフにすると、すべてのソースを<strong>押す前の値</strong>に戻します。</p></li>
+<li><p>複数の Talkback キーが同じソースを使っている場合、一つをオフにすると、そのソースを使っているほかのキーも一緒にオフになり、表示もオフに変わります。</p></li>
+<li><p>Stream Deck アプリやパソコンを再起動しても元の値を覚えています。While held は OBS に接続するとすぐに戻し、Toggle はオンのまま続きます。</p></li>
+<li><p><strong>Toggle がオンのままキーを削除すると、ソースが下がったまま残ります。</strong>オフにしてから削除してください。</p></li>
+<li><p>マルチアクションの中では Toggle だけが動作します。</p></li>
+</ul>
+</section>
+
+<section><h2>Audio monitoring</h2>
+<p>OBS のオーディオの詳細プロパティにある<strong>音声モニタリング</strong>をキーで切り替えます。<strong>Mode</strong> で選びます。</p>
+<table><thead><tr><th>Mode</th><th>できること</th></tr></thead><tbody>
+<tr><td>Set to</td><td><strong>Monitoring</strong> で選んだ値(Monitor off / Monitor only / Monitor and output)にする</td></tr>
+<tr><td>Toggle with off</td><td>押すたびにオフと選んだ値を切り替える</td></tr>
+<tr><td>Cycle</td><td>押すたびにオフ → モニターのみ → モニターと出力 の順に切り替える</td></tr>
+</tbody></table>
+<p>キーにはソース名と現在のモニタリングが表示され、モニタリングがオンの間は青い背景になります。</p>
+</section>
+
+<section><h2>メーターの設定</h2>
+<p>メーターのあるアクション(VU Dial、Fader(2-Button)、Volume)には <strong>Meter style</strong> があります。OBS の<strong>設定 → 音声 → ピークメーターの種類</strong>と同じ方を選んでください。</p>
+<table><thead><tr><th>Meter style</th><th>OBS の設定</th><th>色の範囲</th></tr></thead><tbody>
+<tr><td>Standard</td><td>サンプルピーク</td><td>黄 −20 dB から、赤 −9 dB から</td></tr>
+<tr><td>Wide green</td><td>トゥルーピーク</td><td>黄 −13 dB から、赤 −2 dB から</td></tr>
+</tbody></table>
+<p>OBS はプラグインにサンプルピークの値だけを送ります。そのため Wide green は色の範囲だけが OBS と同じで、大きな音が出たときに OBS の画面よりわずかに低く見えることがあります。メーターは OBS と同じようにピークがゆっくり下がり、ピークホールドの印が 20 秒残ります。</p>
+</section>
+
+<section><h2>キーの表示を変える</h2>
+<p><strong>ソース名を変える:</strong> 設定画面の <strong>Display name</strong> に好きな名前を入力します。空欄なら OBS のソース名が出ます。Stream Deck アプリのタイトル欄を使うとプラグインの文字と重なるので、名前は Display name で変えてください。</p>
+<p><strong>状態ごとに見た目を変える:</strong> Mute、Push to talk / Push to mute、Talkback、Audio monitoring のキーには状態が2つあります。</p>
+<ol>
+<li><p>Stream Deck アプリでそのキーをクリックします。</p></li>
+<li><p>アイコンの下にある2つの点を確認します。それぞれの点がどの状態かは下の表を見てください。</p></li>
+<li><p>点を押してから、その状態で表示するアイコンとタイトルを設定します。</p></li>
+</ol>
+<table><thead><tr><th>キー</th><th>左の点</th><th>右の点</th></tr></thead><tbody>
+<tr><td>Mute</td><td>ソースの音が出ているとき</td><td>ソースの音が消えているとき(ミュート)</td></tr>
+<tr><td>Talkback</td><td>ほかのソースの音がそのまま出ているとき</td><td>ほかのソースの音が消えた、または下がったとき(トークバック オン)</td></tr>
+<tr><td>Push to talk</td><td>ソースの音が出ているとき(押している間)</td><td>ソースの音が消えているとき(普段、押していないとき)</td></tr>
+<tr><td>Push to mute</td><td>ソースの音が出ているとき(普段、押していないとき)</td><td>ソースの音が消えているとき(押している間)</td></tr>
+<tr><td>Audio monitoring</td><td>モニタリングがオフのとき</td><td>モニタリングがオン(モニターのみ、またはモニターと出力)のとき</td></tr>
+</tbody></table>
+<p>タイトルを入れると、プラグインが描く名前と状態の文字は消えます(背景色はそのまま)。自分で設定したアイコンが表示されている間は、OFFLINE などの表示が見えないことがあります。点が一つしか見えない場合は、古いバージョンで置いたキーです。そのキーを削除して、アクション一覧からもう一度ドラッグしてください。</p>
+</section>
+
+<section><h2>キーに表示される文字とトラブルシューティング</h2>
+<p>キーやダイヤルに次の文字が出たら、右の列を順番に確認してください。言語を日本語にしている場合は、かっこ内の文字で表示されます。</p>
+<table><thead><tr><th>表示 / 症状</th><th>意味</th><th>すること</th></tr></thead><tbody>
+<tr><td>OFFLINE (オフライン)</td><td>OBS に接続していない</td><td>OBS が起動しているか → WebSocket サーバーが有効か → ポート 4455 → パスワード の順に確認</td></tr>
+<tr><td>SET SOURCE (ソース選択)</td><td>ソースをまだ選んでいない</td><td>アクションをクリックし、設定画面で Source を選ぶ</td></tr>
+<tr><td>SETUP (設定)</td><td>ほかの必須設定が空欄</td><td>設定画面の空欄(Mode、値など)を入力</td></tr>
+<tr><td>N/A</td><td>選んだソースが OBS にない(削除された)</td><td>別のソースを選ぶ</td></tr>
+<tr><td>レベルバーが動かない</td><td>そのソースに音が入っていない</td><td>OBS の音声ミキサーでそのソースのメーターが動くか確認</td></tr>
+<tr><td>Source 一覧が空</td><td>まだ接続していない</td><td>接続すると一覧が出ます。出ない場合は OFFLINE の項目を確認</td></tr>
+<tr><td>繰り返しが止まらない</td><td>キーを離した信号を受け取れなかった</td><td>そのキーをもう一度押す</td></tr>
+<tr><td>トークバックをオフにしても音が小さい</td><td>オンのままキーを削除した、または OBS との接続が切れた</td><td>OBS との接続を確認。キーを削除した場合は OBS で音量を直接戻す</td></tr>
+</tbody></table>
+</section>
+
+<section><h2>お問い合わせ</h2>
+<p>使用中に問題や疑問があれば、作者(Kimtan2 / 김탄2)にお問い合わせください。</p>
+<ul>
+<li><p><strong>Discord:</strong> kimtan2</p></li>
+<li><p><strong>Chzzk(치지직):</strong> 김탄2</p></li>
+</ul>
+<p>OBS および OBS Studio は OBS Project の商標です。このプラグインは OBS Project とは関係のない非公式プロジェクトです。</p>
+</section>
+</body>
+</html>

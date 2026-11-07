@@ -6,13 +6,14 @@ Control the **OBS audio mixer** with the keys and dials of an Elgato Stream Deck
 
 ## Download
 
-Unzip the `Web-Socket-Audio-Controller-StreamDeck-v<version>.zip` you received. It contains:
+Get `Web-Socket-Audio-Controller-StreamDeck-v<version>.zip` from the [latest release](https://github.com/KimTaehan0822/streamdeck-Web-Socket-Audio-Controller/releases/latest) page and unzip it. It contains:
 
 - `Web-Socket-Audio-Controller.streamDeckPlugin`: the installer
 - The manual as PDF (one per language)
   - `Web-Socket Audio Controller 스트림덱 플러그인 사용설명서.pdf`: Korean
   - `Web-Socket Audio Controller Stream Deck Plugin Manual (English).pdf`: English
   - `Web-Socket Audio Controller Stream Deck プラグイン 取扱説明書 (日本語).pdf`: Japanese
+- `LICENSE`: this plugin's license (MIT)
 - `THIRD-PARTY-NOTICES.txt`: notices for the open-source software used
 
 The manual sources are in the [`docs/manual`](docs/manual) folder of this repository.

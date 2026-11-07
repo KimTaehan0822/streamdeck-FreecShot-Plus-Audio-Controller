@@ -5,3 +5,4 @@ test/out
 *.streamDeckPlugin
 .superpowers/sdd
 talkback-state.json
+release

@@ -6,13 +6,14 @@ Elgato Stream Deck의 키와 다이얼로 **OBS 오디오 믹서**를 조작하�
 
 ## 다운로드
 
-배포받은 `Web-Socket-Audio-Controller-StreamDeck-v<버전>.zip`의 압축을 풉니다. 안에 들어 있는 파일은 아래와 같습니다.
+[최신 릴리즈](https://github.com/KimTaehan0822/streamdeck-Web-Socket-Audio-Controller/releases/latest) 페이지에서 `Web-Socket-Audio-Controller-StreamDeck-v<버전>.zip`을 받아 압축을 풉니다. 안에 들어 있는 파일은 아래와 같습니다.
 
 - `Web-Socket-Audio-Controller.streamDeckPlugin`: 설치 파일
 - 사용설명서 PDF (언어별로 하나씩)
   - `Web-Socket Audio Controller 스트림덱 플러그인 사용설명서.pdf`: 한국어
   - `Web-Socket Audio Controller Stream Deck Plugin Manual (English).pdf`: 영어
   - `Web-Socket Audio Controller Stream Deck プラグイン 取扱説明書 (日本語).pdf`: 일본어
+- `LICENSE`: 이 플러그인의 라이선스 (MIT)
 - `THIRD-PARTY-NOTICES.txt`: 함께 쓰인 오픈소스 고지
 
 사용설명서 원본은 이 저장소의 [`docs/manual`](docs/manual) 폴더에 있습니다.

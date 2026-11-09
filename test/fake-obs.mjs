@@ -5,9 +5,11 @@ export const settle = async () => {
 }
 
 /** Fake obs-websocket client: answers from `inputs`, records calls, emits events by hand. */
-export function fakeObs({ inputs = [], fail = 0 } = {}) {
+export function fakeObs({ inputs = [], fail = 0, notReady = 0 } = {}) {
 	const clients = []
 	let failures = fail
+	// FreecShot Plus answers every request with code 207 until the user signs in to SOOP.
+	let notReadyLeft = notReady
 	const create = () => {
 		const handlers = {}
 		const client = {
@@ -35,6 +37,10 @@ export function fakeObs({ inputs = [], fail = 0 } = {}) {
 				const input = inputs.find((i) => i.uuid === data?.inputUuid)
 				switch (type) {
 					case 'GetInputList':
+						if (notReadyLeft > 0) {
+							notReadyLeft--
+							throw Object.assign(new Error('OBS is not ready to perform the request.'), { code: 207 })
+						}
 						return { inputs: inputs.map((i) => ({ inputUuid: i.uuid, inputName: i.name, inputKind: i.kind ?? 'wasapi_input_capture' })) }
 					case 'GetInputVolume':
 						if (!input?.audio) throw new Error('not audio')

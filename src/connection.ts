@@ -46,6 +46,7 @@ export class ObsConnection {
 	private settings?: ObsSettings
 	private retry?: unknown
 	private _online = false
+	private _waitingLogin = false
 	private readonly state = new Map<string, InputState>()
 	/** Browser sources seen, whether listed or not. */
 	private readonly browsers = new Set<string>()
@@ -66,6 +67,11 @@ export class ObsConnection {
 
 	get online(): boolean {
 		return this._online
+	}
+
+	/** Connected, but the program refuses requests until the user signs in (FreecShot Plus answers code 207). */
+	get waitingLogin(): boolean {
+		return this._waitingLogin
 	}
 
 	input(uuid: string): InputState | undefined {
@@ -128,11 +134,13 @@ export class ObsConnection {
 				await this.load(client)
 				if (this.client !== client) return
 				this._online = true
+				this._waitingLogin = false
 				this.changed()
 				for (const fn of this.reconnectListeners) fn()
 			} catch (error) {
 				if (this.client !== client) return
 				console.error(`OBS connect: ${errorText(error)}`)
+				this.setWaitingLogin((error as { code?: unknown } | null)?.code === 207)
 				this.lost(client)
 			}
 		})()
@@ -149,6 +157,12 @@ export class ObsConnection {
 			client.disconnect().catch(() => {})
 			this.open()
 		}, RETRY_MS)
+	}
+
+	private setWaitingLogin(waiting: boolean): void {
+		if (waiting === this._waitingLogin) return
+		this._waitingLogin = waiting
+		this.changed()
 	}
 
 	private goOffline(): void {

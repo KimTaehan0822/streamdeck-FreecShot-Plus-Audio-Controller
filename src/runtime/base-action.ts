@@ -15,7 +15,7 @@ import { Redrawer } from './redraw.js'
 
 export interface RenderContext {
 	dial: boolean
-	/** 'offline' while OBS is unreachable, otherwise 'none'; a render may still pick 'setup'/'unsupported' itself. */
+	/** 'offline' while OBS is unreachable, 'login' while it waits for sign-in, otherwise 'none'; a render may still pick 'setup'/'unsupported' itself. */
 	overlay: Overlay
 	/** The user set a title for this key's current state in the Stream Deck app, so the drawn text would collide with it. */
 	userTitle: boolean
@@ -126,7 +126,7 @@ export abstract class ObsAction<S extends JsonObject> extends SingletonAction<S>
 			}
 			const ctx: RenderContext = {
 				dial: instance.action.isDial(),
-				overlay: this.connection.online ? 'none' : 'offline',
+				overlay: this.connection.online ? 'none' : this.connection.waitingLogin ? 'login' : 'offline',
 				userTitle: !!instance.titles[instance.state ?? 0],
 				id: key,
 			}

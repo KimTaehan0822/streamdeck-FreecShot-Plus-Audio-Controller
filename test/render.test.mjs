@@ -420,3 +420,14 @@ test('FreecShot theme: dark key, coloured border and state text instead of a fil
 	const obs = renderMuteKey({ name: 'Mic', muted: true, volumeDb: -6, meter: { ...meter, muted: true }, overlay: 'none' })
 	assert.ok(obs.includes('#8b1a1a') && !obs.includes('#171B1E'), 'OBS look restored')
 })
+
+test('login overlay shows LOGIN, translated', async () => {
+	const { frame } = await import('../dist/render/svg.js')
+	setLanguage('en')
+	assert.ok(frame(144, 144, '', 'login').includes('>LOGIN<'))
+	setLanguage('ko')
+	assert.ok(frame(144, 144, '', 'login').includes('>로그인 대기<'))
+	setLanguage('ja')
+	assert.ok(frame(144, 144, '', 'login').includes('>ログイン待ち<'))
+	setLanguage('en')
+})

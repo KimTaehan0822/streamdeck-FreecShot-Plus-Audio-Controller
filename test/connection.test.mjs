@@ -148,3 +148,21 @@ test('call reports whether OBS took the request', async () => {
 	const offline = await started({ inputs: [MIC], fail: 1 })
 	assert.equal(await offline.conn.call('SetInputMute', { inputUuid: 'u-mic', inputMuted: true }), false)
 })
+
+test('code 207 (not signed in yet) waits for login, then clears once the program is ready', async () => {
+	const { conn, timers } = await started({ inputs: [MIC], notReady: 1 })
+	assert.equal(conn.online, false)
+	assert.equal(conn.waitingLogin, true)
+	let changes = 0
+	conn.onChange(() => changes++)
+	assert.deepEqual(timers.runAll(), [3000])
+	await settle()
+	assert.equal(conn.online, true)
+	assert.equal(conn.waitingLogin, false)
+	assert.ok(changes > 0)
+})
+
+test('any other connect error is plain offline, not waiting for login', async () => {
+	const { conn } = await started({ inputs: [MIC], fail: 1 })
+	assert.equal(conn.waitingLogin, false)
+})

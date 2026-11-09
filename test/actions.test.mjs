@@ -442,3 +442,18 @@ test('a title set in the Stream Deck app hides the drawn name and status', async
 	assert.ok(!img.includes('>Mic<') && !img.includes('>MUTED<'), 'no drawn text under the user title')
 	assert.ok(img.includes('#8b1a1a'), 'background and meter stay')
 })
+
+test('while the program waits for sign-in, keys show LOGIN even before a source is picked', async () => {
+	const { fakeObs, fakeTimers } = await import('./fake-obs.mjs')
+	const obs = fakeObs({ inputs: [{ ...MIC }], notReady: 99 })
+	const timers = fakeTimers()
+	const conn = new connection.ObsConnection({ createClient: obs.create, now: () => 0, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout })
+	conn.start({ host: '127.0.0.1', port: 24455, password: '' })
+	await settle()
+	setLanguage('en')
+	const picked = await appear(MuteAction, conn, false, { inputUuid: 'u-mic' })
+	const none = await appear(MuteAction, conn, false, {})
+	await settle()
+	assert.match(picked.f.images.at(-1), />LOGIN</)
+	assert.match(none.f.images.at(-1), />LOGIN</)
+})

@@ -46,8 +46,9 @@ export abstract class SourceAction extends ObsAction<JsonObject> {
 		return uuid ? this.connection.input(uuid) : undefined
 	}
 
-	/** SET SOURCE until one is picked; N/A when OBS is online but the source is gone. */
+	/** SET SOURCE until one is picked (LOGIN first: no source can be listed before sign-in); N/A when the source is gone. */
 	protected overlay(s: JsonObject, ctx: RenderContext): Overlay {
+		if (ctx.overlay === 'login') return 'login'
 		if (!sourceOf(s)) return 'setup'
 		if (ctx.overlay === 'none' && !this.input(s)) return 'unsupported'
 		return ctx.overlay

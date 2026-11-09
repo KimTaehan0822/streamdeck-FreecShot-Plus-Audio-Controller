@@ -1,3 +1,4 @@
+import { FLAVOUR } from '../flavour.js'
 import type { DidReceiveSettingsEvent, WillAppearEvent, WillDisappearEvent } from '@elgato/streamdeck'
 import type { JsonObject } from '@elgato/utils'
 import type { InputState } from '../connection.js'
@@ -9,7 +10,7 @@ import { ObsAction, type RenderContext } from '../runtime/base-action.js'
 import { FADER_PEEK_MS, faderAdjustedRecently, markFaderAdjusted } from '../runtime/peek.js'
 import { meterOpts, nameOf, sourceOf } from '../runtime/settings.js'
 
-export const ID = 'com.haeunga0822.obs-audio.'
+export const ID = FLAVOUR.uuid + '.'
 const SILENT: MeterDisplay = { left: -Infinity, right: -Infinity, combined: -Infinity, holdLeft: -Infinity, holdRight: -Infinity, holdCombined: -Infinity }
 export type MuteOp = 'toggle' | 'on' | 'off'
 

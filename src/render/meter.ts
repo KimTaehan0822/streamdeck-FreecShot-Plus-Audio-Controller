@@ -1,3 +1,4 @@
+import { theme } from '../flavour.js'
 import type { MeterDisplay } from '../obs/meter-state.js'
 import { t } from '../i18n.js'
 import { dbText } from '../obs/volume.js'
@@ -30,7 +31,6 @@ const BG = ['#267f26', '#7f7f26', '#7f2626']
 const FG = ['#4cff4c', '#ffff4c', '#ff4c4c']
 const BG_MUTED = ['#4a4a4a', '#5a5a5a', '#6a6a6a']
 const FG_MUTED = '#bbb'
-const LINE = 'rgb(40,140,255)'
 const RED = 'rgb(255,57,31)'
 const WHITE = '#fff'
 const GREY = '#ccc'
@@ -101,7 +101,7 @@ function faderLine(b: Box, vertical: boolean, v: KeyMeterView, width: number, r:
 	const p = along(b, vertical, (db - r.lo) / (r.hi - r.lo), (db - r.lo) / (r.hi - r.lo))
 	const [x1, y1, x2, y2] = vertical ? [b.x, p.y, b.x + b.w, p.y] : [p.x, b.y, p.x, b.y + b.h]
 	const line = (stroke: string, w: number) => `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${stroke}" stroke-width="${w}"/>`
-	return line('#000', width + 4) + line(LINE, width)
+	return line('#000', width + 4) + line(theme().faderLine, width)
 }
 
 /** Bars with the fader line on top. */

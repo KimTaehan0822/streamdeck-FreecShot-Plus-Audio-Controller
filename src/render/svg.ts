@@ -1,3 +1,4 @@
+import { theme } from '../flavour.js'
 import { t } from '../i18n.js'
 export const KEY = 144
 /** Widest a name may be on a key: the key's edges sit under the device's bezel. */
@@ -119,6 +120,6 @@ export function frame(width: number, height: number, body: string, overlay: Over
 	}
 	return (
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
-		`<rect width="${width}" height="${height}" fill="#000"/>${content}</svg>`
+		`<rect width="${width}" height="${height}" fill="${theme().keyBg}"/>${content}</svg>`
 	)
 }

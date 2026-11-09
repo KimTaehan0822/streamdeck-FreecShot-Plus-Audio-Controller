@@ -387,3 +387,36 @@ test('vertical two-key fader name is at most 26 px', () => {
 	assert.equal(fontOf(renderButtonFader(view({ name: 'Mic' }), 'top'), 'Mic'), 26)
 	assert.equal(fontOf(renderButtonFader(view({ name: 'Mic' }), 'left'), 'Mic'), 29, 'horizontal up to 29')
 })
+
+test('FreecShot theme: dark key, coloured border and state text instead of a filled background', async () => {
+	const { FLAVOURS, useTheme } = await import('../dist/flavour.js')
+	useTheme(FLAVOURS.freecshot.theme)
+	try {
+		setLanguage('en')
+		const muted = renderMuteKey({ name: 'Mic', muted: true, volumeDb: -6, meter: { ...meter, muted: true }, overlay: 'none' })
+		assert.ok(muted.includes('stroke="#FF4D5E"'))
+		assert.ok(muted.includes('fill="#171B1E"'))
+		assert.ok(!muted.includes('#8b1a1a'))
+		assert.ok(muted.includes('fill="#FF4D5E">MUTED<'), 'MUTED drawn in the mute colour')
+		for (const on of [
+			renderPttKey({ name: 'Mic', mode: 'talk', live: true, meter, overlay: 'none' }),
+			renderTalkbackKey({ name: 'Talkback', style: 'mute', valueDb: 0, active: true, overlay: 'none' }),
+			renderMonitorKey({ name: 'Mic', type: 'OBS_MONITORING_TYPE_MONITOR_ONLY', overlay: 'none' }),
+		]) {
+			assert.ok(on.includes('stroke="#0CC5FE"'))
+			assert.ok(!/#1f7a1f|#b35c00|#24427a/.test(on))
+		}
+		for (const off of [
+			renderMuteKey({ name: 'Mic', muted: false, volumeDb: -6, meter, overlay: 'none' }),
+			renderPttKey({ name: 'Mic', mode: 'talk', live: false, meter, overlay: 'none' }),
+			renderTalkbackKey({ name: 'Talkback', style: 'mute', valueDb: 0, active: false, overlay: 'none' }),
+			renderMonitorKey({ name: 'Mic', type: 'OBS_MONITORING_TYPE_NONE', overlay: 'none' }),
+		])
+			assert.ok(!off.includes('stroke='), 'no border while off')
+		assert.ok(renderButtonFader(view(), 'top').includes('#00D7FC'))
+	} finally {
+		useTheme(FLAVOURS.obs.theme)
+	}
+	const obs = renderMuteKey({ name: 'Mic', muted: true, volumeDb: -6, meter: { ...meter, muted: true }, overlay: 'none' })
+	assert.ok(obs.includes('#8b1a1a') && !obs.includes('#171B1E'), 'OBS look restored')
+})

@@ -1,3 +1,4 @@
+import { theme } from '../flavour.js'
 import { balanceText, dbText } from '../obs/volume.js'
 import { t } from '../i18n.js'
 import type { TalkbackStyle } from '../runtime/talkback.js'
@@ -7,13 +8,14 @@ import { LINE_HEIGHT, nameBlock, wrapName } from './text.js'
 
 const WHITE = '#fff'
 const RED = 'rgb(255,57,31)'
-const MUTED_BG = '#8b1a1a'
-const LIVE_BG = '#1f7a1f'
-const MONITOR_BG = '#24427a'
-const TALKBACK_BG = '#b35c00'
 const BLUE = 'rgb(40,140,255)'
 
 const background = (fill: string) => `<rect width="${KEY}" height="${KEY}" fill="${fill}"/>`
+/** The 'on' look: the whole key filled (OBS), or a frame in that colour on the dark key (FreecShot Plus). */
+const onLook = (colour: string) =>
+	theme().onStyle === 'fill' ? background(colour) : `<rect x="3" y="3" width="${KEY - 6}" height="${KEY - 6}" rx="12" fill="none" stroke="${colour}" stroke-width="6"/>`
+/** State text while on: white on a filled key, the state colour next to a frame. */
+const onText = (colour: string) => (theme().onStyle === 'fill' ? WHITE : colour)
 
 export interface MeterKeyBase {
 	name: string
@@ -50,7 +52,7 @@ function centredStack(name: string, under: string, nameMax = 36, underMax = 40, 
 }
 
 export function renderMuteKey(v: MeterKeyBase & { muted: boolean; volumeDb: number }): string {
-	return frame(KEY, KEY, (v.muted ? background(MUTED_BG) : '') + words(v.bare, centredStack(v.name, v.muted ? t('muted') : '')), v.overlay)
+	return frame(KEY, KEY, (v.muted ? onLook(theme().muted) : '') + words(v.bare, centredStack(v.name, v.muted ? t('muted') : '', 36, 40, onText(theme().muted))), v.overlay)
 }
 
 /** Name at the top, value (or MUTED) in the middle, meter below. */
@@ -66,7 +68,7 @@ const SMALL_UNDER = 26
 /** Green while the source is live; the mode under the name, red while muted. */
 export function renderPttKey(v: MeterKeyBase & { mode: 'talk' | 'mute'; live: boolean }): string {
 	const mode = t(v.mode === 'mute' ? 'pushMute' : 'pushTalk')
-	return frame(KEY, KEY, (v.live ? background(LIVE_BG) : '') + words(v.bare, centredStack(v.name, mode, BIG_NAME, SMALL_UNDER, v.live ? WHITE : RED)), v.overlay)
+	return frame(KEY, KEY, (v.live ? onLook(theme().live) : '') + words(v.bare, centredStack(v.name, mode, BIG_NAME, SMALL_UNDER, v.live ? onText(theme().live) : RED)), v.overlay)
 }
 
 const MONITOR_TEXT = {
@@ -75,20 +77,20 @@ const MONITOR_TEXT = {
 	OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT: 'monOut',
 } as const
 
-function monitorText(type: string): string {
+function monitorText(type: string, fill: string): string {
 	const key = MONITOR_TEXT[type as keyof typeof MONITOR_TEXT]
 	if (key === 'monOut') {
 		// One line would shrink to ~20 px; two lines ("MON" / "+OUT") stay large, both at the same size.
 		const [a, b] = [t('mon'), `+${t('out')}`]
 		const size = Math.min(fitSize(a, 34, KEY - 8, 14), fitSize(b, 34, KEY - 8, 14))
-		return plainText(KEY / 2, 104, a, { size, fill: WHITE }) + plainText(KEY / 2, 136, b, { size, fill: WHITE })
+		return plainText(KEY / 2, 104, a, { size, fill }) + plainText(KEY / 2, 136, b, { size, fill })
 	}
-	return bigStatus(key ? t(key) : '?', WHITE, 118)
+	return bigStatus(key ? t(key) : '?', fill, 118)
 }
 
 export function renderMonitorKey(v: { name: string; type: string; overlay: Overlay; bare?: boolean }): string {
 	const on = v.type !== 'OBS_MONITORING_TYPE_NONE'
-	const body = (on ? background(MONITOR_BG) : '') + words(v.bare, bigName(v.name, 10, 66) + monitorText(v.type))
+	const body = (on ? onLook(theme().monitor) : '') + words(v.bare, bigName(v.name, 10, 66) + monitorText(v.type, on ? onText(theme().monitor) : WHITE))
 	return frame(KEY, KEY, body, v.overlay)
 }
 
@@ -121,5 +123,5 @@ export function renderBalanceStrip(v: { name: string; balance: number; overlay: 
 export function renderTalkbackKey(v: { name: string; style: TalkbackStyle; valueDb: number; active: boolean; overlay: Overlay; bare?: boolean }): string {
 	const db = v.valueDb === -Infinity ? '-inf' : String(v.valueDb)
 	const what = v.style === 'mute' ? t('mute') : v.style === 'level' ? `${db} dB` : `▼${db} dB`
-	return frame(KEY, KEY, (v.active ? background(TALKBACK_BG) : '') + words(v.bare, centredStack(v.name, what, BIG_NAME, SMALL_UNDER)), v.overlay)
+	return frame(KEY, KEY, (v.active ? onLook(theme().talkback) : '') + words(v.bare, centredStack(v.name, what, BIG_NAME, SMALL_UNDER, v.active ? onText(theme().talkback) : WHITE)), v.overlay)
 }

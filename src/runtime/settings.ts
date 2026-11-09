@@ -1,3 +1,4 @@
+import { FLAVOUR } from '../flavour.js'
 import type { JsonObject } from '@elgato/utils'
 import type { ObsSettings } from '../connection.js'
 import type { ChannelMode, MeterStyle } from '../render/meter.js'
@@ -13,7 +14,7 @@ export function normalizeSettings(raw: Partial<Record<keyof ObsSettings, unknown
 	const port = num(raw.port)
 	return {
 		host: String(raw.host ?? '').trim() || '127.0.0.1',
-		port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : 4455,
+		port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : FLAVOUR.defaultPort,
 		password: typeof raw.password === 'string' ? raw.password : '',
 	}
 }

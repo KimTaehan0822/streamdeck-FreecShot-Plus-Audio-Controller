@@ -2,6 +2,8 @@
 
 [한국어](README.md) | [English](README.en.md) | **日本語**
 
+> FreecShot Plus 用は別のプラグインです: [Web-Socket Audio Controller for FreecShot Plus](docs/freecshot/README.ja.md)
+
 Elgato Stream Deck のキーとダイヤルで **OBS の音声ミキサー**を操作するプラグインです。音量、ミュート、プッシュトゥトーク、トークバック、音声モニタリング、バランスをキー一つで操作でき、キーとダイヤルの画面に OBS と同じ見た目のレベルメーターを表示します。OBS に内蔵された **obs-websocket** で直接通信するので、ほかのプログラムは必要ありません。
 
 ## ダウンロード

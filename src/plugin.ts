@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import streamDeck from '@elgato/streamdeck'
 import type { JsonObject } from '@elgato/utils'
 import { ObsConnection } from './connection.js'
+import { FLAVOUR } from './flavour.js'
+import { defaultSetupDeps, runFreecshotSetup } from './freecshot/setup.js'
 import { language, setLanguage, t } from './i18n.js'
 import { meterActions } from './actions/meter-actions.js'
 import { otherActions } from './actions/other.js'
@@ -51,6 +53,7 @@ function pushInputs(force = false): void {
 }
 streamDeck.ui.onSendToPlugin(async (ev) => {
 	const payload = ev.payload as { event?: unknown } | null
+	if (payload?.event === 'freecshotSetup' && FLAVOUR.autoSetup) return freecshotSetup()
 	if (payload?.event !== 'getInputs') return
 	const s: JsonObject = await ev.action.getSettings().catch(() => ({}))
 	const uuid = sourceOf(s)
@@ -66,9 +69,24 @@ function applyLanguage(raw: { language?: unknown }): void {
 	for (const action of actions) action.redrawAll()
 }
 
+/** The last global settings seen (connection and language), for the auto setup to start from. */
+let globals: JsonObject = {}
+
+/** "WebSocket auto setup" on the FreecShot Plus settings screen. The reply never carries the password. */
+async function freecshotSetup(): Promise<void> {
+	const r = await runFreecshotSetup({ port: globals.port, password: globals.password }, defaultSetupDeps())
+	if (r.ok) {
+		globals = { ...globals, host: '127.0.0.1', port: String(r.port), password: r.password }
+		await streamDeck.settings.setGlobalSettings(globals)
+		apply(globals)
+	} else console.error(`FreecShot setup: ${r.reason}`)
+	await streamDeck.ui.sendToPropertyInspector({ event: 'freecshotSetup', ok: r.ok, reason: r.ok ? 'ok' : r.reason }).catch(() => {})
+}
+
 // Wait for typing to settle so each keystroke does not restart the connection.
 let debounce: NodeJS.Timeout | undefined
 streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
+	globals = ev.settings
 	applyLanguage(ev.settings)
 	clearTimeout(debounce)
 	debounce = setTimeout(() => apply(ev.settings), 500)
@@ -76,5 +94,6 @@ streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
 for (const action of actions) streamDeck.actions.registerAction(action)
 await streamDeck.connect()
 const initial = await streamDeck.settings.getGlobalSettings()
+globals = initial
 applyLanguage(initial)
 apply(initial)

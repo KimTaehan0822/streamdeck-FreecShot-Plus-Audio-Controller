@@ -11,9 +11,16 @@ const RED = 'rgb(255,57,31)'
 const BLUE = 'rgb(40,140,255)'
 
 const background = (fill: string) => `<rect width="${KEY}" height="${KEY}" fill="${fill}"/>`
-/** The 'on' look: the whole key filled (OBS), or a frame in that colour on the dark key (FreecShot Plus). */
+/**
+ * The 'on' look: the whole key filled (OBS), or on the dark key a faint tint plus a 12 px frame in that colour
+ * (FreecShot Plus). The frame sits inset: the device's bezel hides the outermost pixels of a key image.
+ */
 const onLook = (colour: string) =>
-	theme().onStyle === 'fill' ? background(colour) : `<rect x="3" y="3" width="${KEY - 6}" height="${KEY - 6}" rx="12" fill="none" stroke="${colour}" stroke-width="6"/>`
+	theme().onStyle === 'fill'
+		? background(colour)
+		: `<rect width="${KEY}" height="${KEY}" fill="${colour}" fill-opacity="0.22"/><rect x="6" y="6" width="${KEY - 12}" height="${KEY - 12}" rx="14" fill="none" stroke="${colour}" stroke-width="12"/>`
+/** With frames, keys that can show one draw their text at 86 %, on and off alike, so it clears the frame without jumping. */
+const framed = (text: string) => (theme().onStyle === 'border' && text ? `<g transform="translate(${KEY / 2} ${KEY / 2}) scale(0.86) translate(${-KEY / 2} ${-KEY / 2})">${text}</g>` : text)
 /** State text while on: white on a filled key, the state colour next to a frame. */
 const onText = (colour: string) => (theme().onStyle === 'fill' ? WHITE : colour)
 
@@ -52,7 +59,7 @@ function centredStack(name: string, under: string, nameMax = 36, underMax = 40, 
 }
 
 export function renderMuteKey(v: MeterKeyBase & { muted: boolean; volumeDb: number }): string {
-	return frame(KEY, KEY, (v.muted ? onLook(theme().muted) : '') + words(v.bare, centredStack(v.name, v.muted ? t('muted') : '', 36, 40, onText(theme().muted))), v.overlay)
+	return frame(KEY, KEY, (v.muted ? onLook(theme().muted) : '') + framed(words(v.bare, centredStack(v.name, v.muted ? t('muted') : '', 36, 40, onText(theme().muted)))), v.overlay)
 }
 
 /** Name at the top, value (or MUTED) in the middle, meter below. */
@@ -68,7 +75,7 @@ const SMALL_UNDER = 26
 /** Green while the source is live; the mode under the name, red while muted. */
 export function renderPttKey(v: MeterKeyBase & { mode: 'talk' | 'mute'; live: boolean }): string {
 	const mode = t(v.mode === 'mute' ? 'pushMute' : 'pushTalk')
-	return frame(KEY, KEY, (v.live ? onLook(theme().live) : '') + words(v.bare, centredStack(v.name, mode, BIG_NAME, SMALL_UNDER, v.live ? onText(theme().live) : RED)), v.overlay)
+	return frame(KEY, KEY, (v.live ? onLook(theme().live) : '') + framed(words(v.bare, centredStack(v.name, mode, BIG_NAME, SMALL_UNDER, v.live ? onText(theme().live) : RED))), v.overlay)
 }
 
 const MONITOR_TEXT = {
@@ -90,7 +97,7 @@ function monitorText(type: string, fill: string): string {
 
 export function renderMonitorKey(v: { name: string; type: string; overlay: Overlay; bare?: boolean }): string {
 	const on = v.type !== 'OBS_MONITORING_TYPE_NONE'
-	const body = (on ? onLook(theme().monitor) : '') + words(v.bare, bigName(v.name, 10, 66) + monitorText(v.type, on ? onText(theme().monitor) : WHITE))
+	const body = (on ? onLook(theme().monitor) : '') + framed(words(v.bare, bigName(v.name, 10, 66) + monitorText(v.type, on ? onText(theme().monitor) : WHITE)))
 	return frame(KEY, KEY, body, v.overlay)
 }
 
@@ -123,5 +130,5 @@ export function renderBalanceStrip(v: { name: string; balance: number; overlay: 
 export function renderTalkbackKey(v: { name: string; style: TalkbackStyle; valueDb: number; active: boolean; overlay: Overlay; bare?: boolean }): string {
 	const db = v.valueDb === -Infinity ? '-inf' : String(v.valueDb)
 	const what = v.style === 'mute' ? t('mute') : v.style === 'level' ? `${db} dB` : `▼${db} dB`
-	return frame(KEY, KEY, (v.active ? onLook(theme().talkback) : '') + words(v.bare, centredStack(v.name, what, BIG_NAME, SMALL_UNDER, v.active ? onText(theme().talkback) : WHITE)), v.overlay)
+	return frame(KEY, KEY, (v.active ? onLook(theme().talkback) : '') + framed(words(v.bare, centredStack(v.name, what, BIG_NAME, SMALL_UNDER, v.active ? onText(theme().talkback) : WHITE))), v.overlay)
 }

@@ -395,6 +395,8 @@ test('FreecShot theme: dark key, coloured border and state text instead of a fil
 		setLanguage('en')
 		const muted = renderMuteKey({ name: 'Mic', muted: true, volumeDb: -6, meter: { ...meter, muted: true }, overlay: 'none' })
 		assert.ok(muted.includes('stroke="#FF4D5E"'))
+		assert.ok(muted.includes('stroke-width="12"'), 'a border thick enough to survive the key bezel')
+		assert.ok(muted.includes('fill="#FF4D5E" fill-opacity="0.22"'), 'a faint tint of the state colour')
 		assert.ok(muted.includes('fill="#171B1E"'))
 		assert.ok(!muted.includes('#8b1a1a'))
 		assert.ok(muted.includes('fill="#FF4D5E">MUTED<'), 'MUTED drawn in the mute colour')
@@ -412,7 +414,10 @@ test('FreecShot theme: dark key, coloured border and state text instead of a fil
 			renderTalkbackKey({ name: 'Talkback', style: 'mute', valueDb: 0, active: false, overlay: 'none' }),
 			renderMonitorKey({ name: 'Mic', type: 'OBS_MONITORING_TYPE_NONE', overlay: 'none' }),
 		])
-			assert.ok(!off.includes('stroke='), 'no border while off')
+			assert.ok(!off.includes('stroke=') && !off.includes('fill-opacity'), 'no border or tint while off')
+		// Text keeps clear of the 12 px border: drawn at 86 % both on and off, so it never jumps when toggled.
+		const ptt = (live) => renderPttKey({ name: '0.MIC', mode: 'talk', live, meter, overlay: 'none' })
+		assert.ok(ptt(true).includes('scale(0.86)') && ptt(false).includes('scale(0.86)'))
 		assert.ok(renderButtonFader(view(), 'top').includes('#00D7FC'))
 	} finally {
 		useTheme(FLAVOURS.obs.theme)

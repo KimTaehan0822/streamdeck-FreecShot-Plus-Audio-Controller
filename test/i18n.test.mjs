@@ -45,3 +45,15 @@ test('talkback store ignores a damaged file', async () => {
 	writeFileSync(file, '{"keys":{"A":"toggle"},"sources":{"x":{"mul":0.5,"mutedByUs":false,"volumeChanged":true,"holders":["A"]}}}')
 	assert.deepEqual(talkbackStore(file).load().keys, { A: 'toggle' })
 })
+
+test('FreecShot Plus settings texts exist in every language', async () => {
+	const { readFileSync } = await import('node:fs')
+	const vm = await import('node:vm')
+	const ctx = {}
+	ctx.globalThis = ctx
+	vm.runInNewContext(readFileSync('com.haeunga0822.obs-audio.sdPlugin/ui/i18n.js', 'utf8'), ctx)
+	const reasons = ['ok', 'running', 'noConfig', 'badConfig', 'badPort', 'portBusy', 'backupFailed', 'writeFailed']
+	const keys = ['freecshotConnection', 'freecshotHint', 'autoSetup', ...reasons.map((r) => 'setup_' + r)]
+	for (const l of ['en', 'ko', 'ja']) for (const k of keys) assert.ok(ctx.PI_TEXT[l][k], `${l}.${k}`)
+	assert.equal(ctx.PI_TEXT.ko.setup_ok, '설정했습니다. 프릭샷플러스를 켜고 SOOP에 로그인하세요')
+})

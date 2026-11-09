@@ -6,3 +6,5 @@ test/out
 .superpowers/sdd
 talkback-state.json
 release
+com.haeunga0822.freecshot-audio.sdPlugin/*
+!com.haeunga0822.freecshot-audio.sdPlugin/imgs/

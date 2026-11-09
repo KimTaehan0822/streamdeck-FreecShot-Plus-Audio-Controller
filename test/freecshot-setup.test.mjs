@@ -97,3 +97,19 @@ test('a failed backup stops before touching the config', async () => {
 	assert.deepEqual(await runFreecshotSetup({ port: '', password: '' }, s.deps), { ok: false, reason: 'backupFailed' })
 	assert.deepEqual(s.read(), ORIGINAL)
 })
+
+test('a port another program listens on counts as busy, whichever address it listens on', async () => {
+	const { isPortBusy } = await import('../dist/freecshot/setup.js')
+	const net = await import('node:net')
+	for (const host of ['0.0.0.0', '127.0.0.1', '::']) {
+		const other = net.createServer()
+		await new Promise((r) => other.listen({ port: 0, host }, r))
+		const { port } = other.address()
+		try {
+			assert.equal(await isPortBusy(port), true, `listener on ${host}`)
+		} finally {
+			await new Promise((r) => other.close(r))
+		}
+		assert.equal(await isPortBusy(port), false, `free again after ${host} closed`)
+	}
+})

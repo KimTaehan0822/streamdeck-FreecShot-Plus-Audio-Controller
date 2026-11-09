@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import { constants } from 'node:fs'
 import nodeFs from 'node:fs/promises'
-import { createServer } from 'node:net'
+import { connect } from 'node:net'
 import { join } from 'node:path'
 
 export const FREECSHOT_PORT = 24455
@@ -96,12 +96,22 @@ const isSoopStudioRunning = () =>
 		),
 	)
 
-const isPortBusy = (port: number) =>
+/** Something answers a connection on that local address and port. Refused or unreachable (no IPv6) means no. */
+const answers = (port: number, host: string) =>
 	new Promise<boolean>((resolve) => {
-		const server = createServer()
-		server.once('error', (e: NodeJS.ErrnoException) => resolve(e.code === 'EADDRINUSE' || e.code === 'EACCES'))
-		server.listen(port, () => server.close(() => resolve(false)))
+		const socket = connect({ port, host })
+		socket.setTimeout(1000)
+		socket.once('connect', () => (socket.destroy(), resolve(true)))
+		// A listener that never answers still holds the port.
+		socket.once('timeout', () => (socket.destroy(), resolve(true)))
+		socket.once('error', () => resolve(false))
 	})
+
+/**
+ * Whether another program already listens on the port. Trying to listen ourselves misses some on Windows (a listener
+ * on 0.0.0.0 or 127.0.0.1 does not block Node's dual-stack listen), so connect to both loopback addresses instead.
+ */
+export const isPortBusy = async (port: number): Promise<boolean> => (await Promise.all([answers(port, '127.0.0.1'), answers(port, '::1')])).some(Boolean)
 
 export function defaultSetupDeps(): SetupDeps {
 	return {

@@ -4,7 +4,7 @@
 	"UUID": "com.haeunga0822.obs-audio",
 	"Name": "Web-Socket Audio Controller",
 	"Version": "1.0.0.0",
-	"Author": "Kimtan2",
+	"Author": "김탄2",
 	"Icon": "imgs/plugin",
 	"Category": "Web-Socket Audio Controller",
 	"CategoryIcon": "imgs/category",

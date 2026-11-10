@@ -13,7 +13,7 @@ test('the FreecShot Plus manifest has its own UUIDs and the same actions', () =>
 	assert.equal(fc.UUID, 'com.haeunga0822.freecshot-audio')
 	assert.equal(fc.Name, 'Web-Socket Audio Controller for FreecShot Plus')
 	assert.equal(fc.Category, 'Web-Socket Audio Controller for FreecShot Plus')
-	assert.equal(fc.Author, 'Kimtan2')
+	assert.equal(fc.Author, '김탄2')
 	assert.equal(fc.Version, '1.0.2.0', 'the FreecShot Plus plugin has its own version')
 	assert.equal(obs.Version, '1.0.1.0')
 	assert.match(fc.Description, /Unofficial/)

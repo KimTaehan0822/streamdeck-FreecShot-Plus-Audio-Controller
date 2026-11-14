@@ -2,6 +2,8 @@
 
 [한국어](README.md) | **English** | [日本語](README.ja.md)
 
+**Version:** 1.0.3
+
 Control the **OBS audio mixer** with the keys and dials of an Elgato Stream Deck. Volume, mute, push to talk, talkback, audio monitoring and balance are one key away, and the keys and dial screens show level meters that look like the ones in OBS. The plugin talks to OBS directly over its built-in **obs-websocket**, so no other program is needed.
 
 ## Download

@@ -16,6 +16,7 @@
 	<div data-global></div>
 	<script src="flavour.js"></script>
 	<script src="i18n.js"></script>
+	<script src="update-check.js"></script>
 	<script src="common.js"></script>
 	<script>
 		// One PI for every action; the action UUID picks the fields.
@@ -213,6 +214,8 @@
 			kind = actionInfo.action.split('.').pop()
 			setPiLang((await client.getGlobalSettings())?.language)
 			await render()
+			const repo = FREECSHOT ? 'streamdeck-FreecShot-Plus-Audio-Controller' : 'streamdeck-Web-Socket-Audio-Controller'
+			UpdateCheck.mountPluginNotice(repo, { available: tr('updateAvailable'), open: tr('openRelease') })
 		}
 		main()
 	</script>

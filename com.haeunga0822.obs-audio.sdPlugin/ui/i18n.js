@@ -89,6 +89,8 @@ globalThis.PI_TEXT = {
 		talkbackHint: 'Sources already muted are left alone. Release (or press again) puts every source back to how it was.',
 		notFound: '(not found)',
 		talkbackNameHint: 'Empty: Talkback',
+		updateAvailable: 'New version available:',
+		openRelease: 'Open release page',
 	},
 	ko: {
 		source: '소스',
@@ -178,6 +180,8 @@ globalThis.PI_TEXT = {
 		talkbackHint: '이미 음소거된 소스는 건드리지 않습니다. 떼면(또는 다시 누르면) 모든 소스가 원래대로 돌아옵니다.',
 		notFound: '(없음)',
 		talkbackNameHint: '비우면: 토크백',
+		updateAvailable: '새 버전이 나왔어요:',
+		openRelease: '릴리즈 페이지 열기',
 	},
 	ja: {
 		source: 'ソース',
@@ -267,5 +271,7 @@ globalThis.PI_TEXT = {
 		talkbackHint: 'すでにミュートのソースはそのままです。離す(またはもう一度押す)と、すべてのソースが元に戻ります。',
 		notFound: '(見つかりません)',
 		talkbackNameHint: '空欄: トークバック',
+		updateAvailable: '新しいバージョンがあります:',
+		openRelease: 'リリースページを開く',
 	},
 }

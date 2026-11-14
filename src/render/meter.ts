@@ -24,7 +24,23 @@ export type KeyMeterView = Pick<ObsMeterView, 'levels' | 'muted' | 'style' | 'ch
 
 // OBS VolumeMeter: sample peak warns at -20 / errors at -9 dB; true peak at -13 / -2 dB.
 export const zoneEdges = (style: MeterStyle): [number, number] => (style === 'wide' ? [-13, -2] : [-20, -9])
-export const METER_MIN = -60
+/** Where the meters start (their low end); the user picks one for every key. The top is always 0 dB like OBS. */
+export const METER_FLOORS = [-60, -50, -40, -30] as const
+let floor: number = -60
+export const meterFloor = (): number => floor
+/** Reads the global setting; anything not in METER_FLOORS is -60. True when the floor changed. */
+export function setMeterFloor(raw: unknown): boolean {
+	const v = typeof raw === 'number' || typeof raw === 'string' ? Number(raw) : NaN
+	const next = (METER_FLOORS as readonly number[]).includes(v) ? v : -60
+	const changed = next !== floor
+	floor = next
+	return changed
+}
+/** Numbers on the scale every 5, 10 or 20 dB: the tightest that keeps them `minGap` px apart (24 by default) on a meter `length` px long. */
+export function labelStep(length: number, from: number, minGap = 24): 5 | 10 | 20 {
+	for (const step of [5, 10] as const) if ((length * step) / -from >= minGap) return step
+	return 20
+}
 
 // OBS default theme colours: dim background zones, bright level, grey while muted.
 const BG = ['#267f26', '#7f7f26', '#7f2626']
@@ -59,11 +75,11 @@ function along(b: Box, vertical: boolean, f0: number, f1: number): Box {
 }
 
 /** One OBS meter bar: three dim zones, the bright level up to `level`, a peak-hold tick. */
-function bar(b: Box, vertical: boolean, level: number, hold: number, v: KeyMeterView, r: Range = { lo: METER_MIN, hi: 0 }): string {
+function bar(b: Box, vertical: boolean, level: number, hold: number, v: KeyMeterView, r: Range = { lo: meterFloor(), hi: 0 }): string {
 	const [warn, err] = zoneEdges(v.style)
 	const f = (db: number) => clamp01((db - r.lo) / (r.hi - r.lo))
 	const zones: [number, number][] = [
-		[METER_MIN, warn],
+		[meterFloor(), warn],
 		[warn, err],
 		[err, 0],
 	]
@@ -78,7 +94,7 @@ function bar(b: Box, vertical: boolean, level: number, hold: number, v: KeyMeter
 		const box = along(b, vertical, f(a), f(top))
 		out += rect(box.x, box.y, box.w, box.h, v.muted ? FG_MUTED : FG[i])
 	})
-	if (hold > METER_MIN && hold >= r.lo && hold <= r.hi) {
+	if (hold > meterFloor() && hold >= r.lo && hold <= r.hi) {
 		const zone = hold >= err ? 2 : hold >= warn ? 1 : 0
 		const p = along(b, vertical, f(hold), f(hold))
 		out += vertical ? rect(p.x, p.y - 1, b.w, 2, v.muted ? FG_MUTED : FG[zone]) : rect(p.x - 1, p.y, 2, b.h, v.muted ? FG_MUTED : FG[zone])
@@ -94,9 +110,9 @@ function bars(b: Box, vertical: boolean, v: KeyMeterView, r?: Range, gap = 3): s
 	return bar(half, vertical, l.left, l.holdLeft, v, r) + bar(second, vertical, l.right, l.holdRight, v, r)
 }
 
-/** Fader position: a blue line inside the bars at the volume's place on the meter scale (-inf sits at -60). */
-function faderLine(b: Box, vertical: boolean, v: KeyMeterView, width: number, r: Range = { lo: METER_MIN, hi: 0 }): string {
-	const db = Math.max(METER_MIN, Math.min(0, v.volumeDb))
+/** Fader position: a blue line inside the bars at the volume's place on the meter scale (below the start, and -inf, sit at the low end). */
+function faderLine(b: Box, vertical: boolean, v: KeyMeterView, width: number, r: Range = { lo: meterFloor(), hi: 0 }): string {
+	const db = Math.max(meterFloor(), Math.min(0, v.volumeDb))
 	if (db < r.lo || db > r.hi) return ''
 	const p = along(b, vertical, (db - r.lo) / (r.hi - r.lo), (db - r.lo) / (r.hi - r.lo))
 	const [x1, y1, x2, y2] = vertical ? [b.x, p.y, b.x + b.w, p.y] : [p.x, b.y, p.x, b.y + b.h]
@@ -110,12 +126,15 @@ const meterWithFader = (b: Box, vertical: boolean, v: KeyMeterView, gap: number,
 
 /**
  * OBS-style dB scale beside the bars (below them when horizontal, right of them when vertical):
- * a tick every 5 dB, a longer one and a number every `labelEvery` dB.
+ * a tick every 5 dB, a longer one and a number every labelStep dB.
  */
-function scaleMarks(b: Box, vertical: boolean, size: number, labelEvery: number, seam?: number): string {
+function scaleMarks(b: Box, vertical: boolean, size: number, seam?: number): string {
+	const lo = meterFloor()
+	// Side by side, wider numbers need more room: 24 px fits the 11 px labels, so scale it with the font size.
+	const labelEvery = labelStep(vertical ? b.h : b.w, lo, vertical ? 24 : (24 * size) / 11)
 	let out = ''
-	for (let db = 0; db >= METER_MIN; db -= 5) {
-		const p = along(b, vertical, (db - METER_MIN) / -METER_MIN, (db - METER_MIN) / -METER_MIN)
+	for (let db = 0; db >= lo; db -= 5) {
+		const p = along(b, vertical, (db - lo) / -lo, (db - lo) / -lo)
 		const major = db % labelEvery === 0
 		// A number on the seam of a two-key fader would be cut in half; keep just its tick there.
 		const label = major && (seam === undefined || Math.abs((vertical ? p.y : p.x) - seam) > 10)
@@ -131,8 +150,8 @@ function scaleMarks(b: Box, vertical: boolean, size: number, labelEvery: number,
 }
 
 /** OBS look: thin L/R bars 1 apart, the fader line, the dB scale. */
-const obsMeter = (b: Box, vertical: boolean, v: KeyMeterView, width: number, size: number, labelEvery: number, seam?: number) =>
-	meterWithFader(b, vertical, v, 1, width) + scaleMarks(b, vertical, size, labelEvery, seam)
+const obsMeter = (b: Box, vertical: boolean, v: KeyMeterView, width: number, size: number, seam?: number) =>
+	meterWithFader(b, vertical, v, 1, width) + scaleMarks(b, vertical, size, seam)
 
 /** Volume text, MUTED while muted, the volume again during a peek. */
 function volumeLabel(v: Pick<ObsMeterView, 'muted' | 'peek' | 'volumeDb'>): { text: string; fill: string } {
@@ -151,7 +170,7 @@ const base = (cy: number, size: number) => n(cy + size * 0.35)
  */
 export function renderVuStrip(v: ObsMeterView): string {
 	let body = nameBlock(v.name, { x: 100, top: 1, width: 192, height: 28, maxLines: 2, size: 20, minSize: 11 })
-	body += obsMeter({ x: 12, y: 31, w: 176, h: 19 }, false, v, 3, 11, 10)
+	body += obsMeter({ x: 12, y: 31, w: 176, h: 19 }, false, v, 3, 11)
 	if (!v.muted) {
 		const l = v.levels
 		body +=
@@ -189,10 +208,10 @@ export function renderButtonFader(v: ObsMeterView, role: FaderRole): string {
 	let body: string
 	if (vertical) {
 		const top = volumeBaseline + 10
-		body = obsMeter({ x: 34, y: top, w: 44, h: 216 - top }, true, v, 3, 14, 10, KEY)
+		body = obsMeter({ x: 34, y: top, w: 44, h: 216 - top }, true, v, 3, 14, KEY)
 	} else {
 		const top = nameBottom + 6
-		body = obsMeter({ x: 16, y: n(top), w: 256, h: n(Math.max(16, 80 - top)) }, false, v, 3, 14, 10, KEY)
+		body = obsMeter({ x: 16, y: n(top), w: 256, h: n(Math.max(16, 80 - top)) }, false, v, 3, 14, KEY)
 	}
 	const row = (t: string, cy: number, fill = WHITE) => plainText(KEY / 2, base(cy * u, size), fitText(t, size, KEY - 4), { size, fill })
 	const volume = dbText(v.volumeDb)
@@ -207,5 +226,5 @@ export function renderButtonFader(v: ObsMeterView, role: FaderRole): string {
 
 /** OBS-style meter at the bottom of a key (y 104..132), where the TotalMix value key has its meter. */
 export function renderKeyMeter(v: KeyMeterView): string {
-	return obsMeter({ x: 12, y: 104, w: 120, h: 13 }, false, v, 2, 11, 20)
+	return obsMeter({ x: 12, y: 104, w: 120, h: 13 }, false, v, 2, 11)
 }

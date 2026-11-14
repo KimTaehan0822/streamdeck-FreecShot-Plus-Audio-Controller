@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Web-Socket Audio Controller for FreecShot Plus Stream Deck Plugin Manual</h1>
-<p><time datetime="2026-11-10">2026-11-10</time></p>
+<p><time datetime="2026-11-14">2026-11-14</time> · Version 1.0.4</p>
 <p>A plugin that controls the volume, mute, monitoring and balance of the <strong>FreecShot Plus</strong> audio mixer from a Stream Deck, and shows level meters on the keys and dial screens. It installs separately from the OBS edition of Web-Socket Audio Controller, so you can use OBS and FreecShot Plus side by side.</p>
 <p>Made by <strong>김탄2 (Kimtan2)</strong></p>
 
@@ -200,6 +200,7 @@
 <tr><td>Wide green</td><td>True Peak</td><td>yellow from −13 dB, red from −2 dB</td></tr>
 </tbody></table>
 <p>FreecShot Plus sends the plugin sample-peak values only, so Wide green matches FreecShot Plus in its colour ranges only; loud peaks may read slightly lower than in FreecShot Plus. Like FreecShot Plus, the meter falls back gradually and shows a peak-hold mark for 20 seconds.</p>
+<p><strong>Meter range:</strong> unfold <strong>▶ Meter range</strong> at the bottom of the settings screen and pick where the meters start in <strong>Start</strong>: -60 / -50 / -40 / -30 dB. The default is -60 dB, and the choice applies to every key at once. With -40, for example, only -40 to 0 dB is shown, wider, so speech levels are easier to read. Only what the meters show changes, not the volume range; sound below the start sits at the low end of the meter.</p>
 </section>
 
 <section><h2>Changing what a key shows</h2>

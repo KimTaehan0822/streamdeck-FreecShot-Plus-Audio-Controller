@@ -6,6 +6,7 @@ import { FLAVOUR } from './flavour.js'
 import { defaultSetupDeps, runFreecshotSetup } from './freecshot/setup.js'
 import { language, setLanguage, t } from './i18n.js'
 import { meterActions } from './actions/meter-actions.js'
+import { setMeterFloor } from './render/meter.js'
 import { otherActions } from './actions/other.js'
 import { PttAction } from './actions/ptt.js'
 import { TalkbackAction } from './actions/talkback.js'
@@ -69,6 +70,11 @@ function applyLanguage(raw: { language?: unknown }): void {
 	for (const action of actions) action.redrawAll()
 }
 
+/** The meter start (-60/-50/-40/-30 dB) is global too and, like the language, only redraws the keys. */
+function applyMeterFloor(raw: { meterFloor?: unknown }): void {
+	if (setMeterFloor(raw.meterFloor)) for (const action of actions) action.redrawAll()
+}
+
 /** The last global settings seen (connection and language), for the auto setup to start from. */
 let globals: JsonObject = {}
 
@@ -88,6 +94,7 @@ let debounce: NodeJS.Timeout | undefined
 streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
 	globals = ev.settings
 	applyLanguage(ev.settings)
+	applyMeterFloor(ev.settings)
 	clearTimeout(debounce)
 	debounce = setTimeout(() => apply(ev.settings), 500)
 })
@@ -96,4 +103,5 @@ await streamDeck.connect()
 const initial = await streamDeck.settings.getGlobalSettings()
 globals = initial
 applyLanguage(initial)
+applyMeterFloor(initial)
 apply(initial)

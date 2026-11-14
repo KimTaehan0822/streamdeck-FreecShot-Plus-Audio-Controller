@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Web-Socket Audio Controller for FreecShot Plus Stream Deck プラグイン 取扱説明書</h1>
-<p><time datetime="2026-11-10">2026-11-10</time></p>
+<p><time datetime="2026-11-14">2026-11-14</time> · バージョン 1.0.4</p>
 <p>Stream Deck から <strong>FreecShot Plus</strong> の音声ミキサーの音量、ミュート、モニタリング、バランスを操作し、キーとダイヤルの画面でレベルメーターを表示するプラグインです。OBS 版の Web-Socket Audio Controller とは別にインストールされるので、OBS と FreecShot Plus を同時に使えます。</p>
 <p>作者: <strong>김탄2(Kimtan2)</strong></p>
 
@@ -200,6 +200,7 @@
 <tr><td>Wide green</td><td>トゥルーピーク</td><td>黄 −13 dB から、赤 −2 dB から</td></tr>
 </tbody></table>
 <p>FreecShot Plus はプラグインにサンプルピークの値だけを送ります。そのため Wide green は色の範囲だけが FreecShot Plus と同じで、大きな音が出たときに FreecShot Plus の画面よりわずかに低く見えることがあります。メーターは FreecShot Plus と同じようにピークがゆっくり下がり、ピークホールドの印が 20 秒残ります。</p>
+<p><strong>メーター範囲:</strong> 設定画面のいちばん下の <strong>▶ Meter range</strong>(日本語設定では<strong>メーター範囲</strong>)を開き、<strong>Start</strong>(開始点)でメーターが始まる値を -60 / -50 / -40 / -30 dB から選びます。初期値は -60 dB で、選ぶとすぐにすべてのキーのメーターに適用されます。たとえば -40 を選ぶと -40 〜 0 dB だけが広く表示され、話し声の範囲が見やすくなります。変わるのは表示の範囲だけで音量の調整範囲はそのままです。開始点より小さい音はメーターの端に表示されます。</p>
 </section>
 
 <section><h2>キーの表示を変える</h2>

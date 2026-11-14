@@ -25,11 +25,14 @@ const globalBlock = () => `
 ${FREECSHOT ? `<sdpi-item label=""><button type="button" class="tb-btn" id="fc-setup">${tr('autoSetup')}</button></sdpi-item><div class="hint" id="fc-result" role="status"></div>` : ''}
 <div class="hint">${tr(FREECSHOT ? 'freecshotHint' : 'obsHint')}</div>
 </details>
+<details class="connection"><summary>${tr('meterRange')}</summary>
+<sdpi-item label="${tr('meterStart')}"><sdpi-select setting="meterFloor" global default="-60">${[-60, -50, -40, -30].map((d) => `<option value="${d}">${d} dB</option>`).join('')}</sdpi-select></sdpi-item>
+</details>
 <details class="connection"><summary>${tr('language')}</summary>
 <sdpi-item label="${tr('language')}"><sdpi-select setting="language" global default="en"><option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option></sdpi-select></sdpi-item>
 </details>`
 
-/** Draws the connection and language block into every [data-global] slot. */
+/** Draws the connection, meter range and language blocks into every [data-global] slot. */
 function renderGlobal() {
 	for (const slot of document.querySelectorAll('[data-global]')) slot.innerHTML = globalBlock()
 	if (FREECSHOT) wireAutoSetup()

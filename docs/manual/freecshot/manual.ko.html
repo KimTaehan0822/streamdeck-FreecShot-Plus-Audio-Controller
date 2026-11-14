@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Web-Socket Audio Controller for FreecShot Plus 스트림덱 플러그인 사용설명서</h1>
-<p><time datetime="2026-11-10">2026-11-10</time></p>
+<p><time datetime="2026-11-14">2026-11-14</time> · 버전 1.0.4</p>
 <p>스트림덱으로 <strong>프릭샷플러스(FreecShot Plus)</strong> 오디오 믹서의 볼륨, 뮤트, 모니터링, 밸런스를 바로 조절하고, 키와 다이얼 화면에서 레벨 미터를 보는 플러그인입니다. OBS용 Web-Socket Audio Controller와 따로 설치되므로, OBS와 프릭샷플러스를 함께 쓸 수 있습니다.</p>
 <p>만든 사람: <strong>김탄2</strong></p>
 
@@ -201,6 +201,7 @@
 <tr><td>Wide green</td><td>트루 피크</td><td>노랑 −13 dB, 빨강 −2 dB부터</td></tr>
 </tbody></table>
 <p>프릭샷플러스는 플러그인에 샘플 피크 값만 보내 줍니다. 그래서 Wide green은 색 구간만 프릭샷플러스와 같고, 큰 소리가 튈 때 프릭샷플러스 화면보다 아주 조금 낮게 보일 수 있습니다. 미터는 프릭샷플러스처럼 피크가 천천히 내려가고, 피크 홀드 표시가 20초 동안 남습니다.</p>
+<p><strong>미터 범위:</strong> 설정 화면 맨 아래의 <strong>▶ Meter range</strong>(한국어 설정에서는 <strong>미터 범위</strong>)를 펼쳐 <strong>Start</strong>(시작점)에서 미터가 시작하는 값을 -60 / -50 / -40 / -30 dB 중에서 고릅니다. 처음 값은 -60 dB이고, 고르는 즉시 모든 키의 미터에 적용됩니다. 예를 들어 -40을 고르면 -40 ~ 0 dB만 넓게 보여서 말소리 구간을 보기 쉬워집니다. 화면에 보이는 범위만 바뀌고 볼륨 조절 범위는 그대로이며, 시작점보다 작은 소리는 미터 맨 끝에 붙습니다.</p>
 </section>
 
 <section><h2>키 표시 바꾸기</h2>

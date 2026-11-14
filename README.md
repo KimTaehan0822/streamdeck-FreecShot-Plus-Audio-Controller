@@ -2,6 +2,8 @@
 
 **한국어** | [English](README.en.md) | [日本語](README.ja.md)
 
+**버전:** 1.0.4
+
 Elgato Stream Deck의 키와 다이얼로 **프릭샷플러스(FreecShot Plus)** 오디오 믹서를 조작하는 플러그인입니다. 볼륨, 뮤트, Push to talk, 토크백, 오디오 모니터링, 밸런스를 키 하나로 다루고, 키와 다이얼 화면에서 레벨 미터를 볼 수 있습니다.
 
 OBS용 [Web-Socket Audio Controller](https://github.com/KimTaehan0822/streamdeck-Web-Socket-Audio-Controller/blob/main/README.md)와 같은 기능이고, 따로 설치되는 별개의 플러그인입니다. 두 개를 함께 설치하면 OBS와 프릭샷플러스를 동시에 쓸 수 있습니다(키 하나는 한 프로그램만 조작합니다).
@@ -45,6 +47,10 @@ OBS용 [Web-Socket Audio Controller](https://github.com/KimTaehan0822/streamdeck
 ### 3. 첫 키 만들기
 
 **Mute**를 키에 놓고 **Source**에서 마이크 같은 오디오 소스를 고릅니다. 음소거 중에는 빨간 테두리와 옅은 빨간 바탕이 생깁니다.
+
+## 미터 범위
+
+설정 화면 맨 아래의 **▸ Meter range**(한국어 설정에서는 **미터 범위**)를 펼쳐 **Start**(시작점)에서 미터가 시작하는 값을 **-60 / -50 / -40 / -30 dB** 중에서 고릅니다. 처음 값은 -60 dB입니다. 고르는 즉시 VU Dial, Fader(2-Button), Volume 키의 미터가 모두 바뀝니다. 예를 들어 -40을 고르면 -40 ~ 0 dB만 넓게 보여서, 말소리 구간을 보기 쉬워집니다. 화면에 보이는 범위만 바뀌고 볼륨 조절 범위는 그대로이며, 시작점보다 작은 소리는 미터 맨 끝에 붙습니다.
 
 ## 키에 뜨는 표시
 

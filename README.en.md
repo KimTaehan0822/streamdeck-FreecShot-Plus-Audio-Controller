@@ -2,6 +2,8 @@
 
 [한국어](README.md) | **English** | [日本語](README.ja.md)
 
+**Version:** 1.0.4
+
 Control the **FreecShot Plus** audio mixer with the keys and dials of an Elgato Stream Deck. Volume, mute, push to talk, talkback, audio monitoring and balance are one key away, and the keys and dial screens show level meters.
 
 It has the same features as the OBS edition, [Web-Socket Audio Controller](https://github.com/KimTaehan0822/streamdeck-Web-Socket-Audio-Controller/blob/main/README.en.md), and installs as a separate plugin. Install both to use OBS and FreecShot Plus at the same time (each key controls one program).
@@ -45,6 +47,10 @@ Before changing anything, the button backs up the original file as `config.json.
 ### 3. Make your first key
 
 Put **Mute** on a key and pick an audio source such as your microphone in **Source**. While muted, the key gets a red frame and a faint red tint.
+
+## Meter range
+
+Unfold **▸ Meter range** at the bottom of the settings screen and pick where the meters start in **Start**: **-60 / -50 / -40 / -30 dB**. The default is -60 dB. The meters on VU Dial, Fader(2-Button) and Volume keys change at once. With -40, for example, only -40 to 0 dB is shown, wider, so speech levels are easier to read. Only what the meters show changes, not the volume range; sound below the start sits at the low end of the meter.
 
 ## Signs on the keys
 

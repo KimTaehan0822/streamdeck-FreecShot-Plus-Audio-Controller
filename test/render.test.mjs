@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import test from 'node:test'
 import { wrapName } from '../dist/render/text.js'
-import { renderVuStrip, renderButtonFader, zoneEdges } from '../dist/render/meter.js'
+import { renderVuStrip, renderButtonFader, zoneEdges, setMeterFloor, meterFloor, labelStep } from '../dist/render/meter.js'
 import { renderMuteKey, renderVolumeKey, renderPttKey, renderMonitorKey, renderBalanceKey, renderBalanceStrip, renderTalkbackKey } from '../dist/render/keys.js'
 import { sliderPos } from '../dist/obs/volume.js'
 import { setLanguage } from '../dist/i18n.js'
@@ -435,4 +435,61 @@ test('login overlay shows LOGIN, translated', async () => {
 	setLanguage('ja')
 	assert.ok(frame(144, 144, '', 'login').includes('>ログイン待ち<'))
 	setLanguage('en')
+})
+
+test('meter floor setting: only -60/-50/-40/-30, anything else is -60', () => {
+	try {
+		assert.equal(setMeterFloor('-40'), true)
+		assert.equal(meterFloor(), -40)
+		assert.equal(setMeterFloor(-40), false)
+		for (const bad of [undefined, 'abc', '-45', -100, null]) {
+			setMeterFloor(bad)
+			assert.equal(meterFloor(), -60, String(bad))
+		}
+	} finally {
+		setMeterFloor(-60)
+	}
+})
+
+test('label step keeps numbers 24 px apart', () => {
+	assert.deepEqual([-60, -50, -40, -30].map((f) => labelStep(176, f)), [10, 10, 10, 5])
+	assert.deepEqual([-60, -50, -40, -30].map((f) => labelStep(120, f)), [20, 10, 10, 10])
+})
+
+test('dial with the meter starting at -40 shows -40..0 only', () => {
+	try {
+		setMeterFloor('-40')
+		const svg = renderVuStrip(view())
+		for (const db of [0, -10, -20, -30, -40]) assert.ok(svg.includes(`>${db}<`), String(db))
+		assert.ok(!svg.includes('>-50<') && !svg.includes('>-60<'))
+		setMeterFloor('-30')
+		assert.ok(renderVuStrip(view()).includes('>-25<'), 'every 5 dB at -30')
+	} finally {
+		setMeterFloor(-60)
+	}
+})
+
+test('levels, hold and volume below the start sit at the low end', () => {
+	try {
+		setMeterFloor('-40')
+		const quiet = renderVuStrip(view({ levels: { left: -50, right: -55, combined: -50, holdLeft: -45, holdRight: -48, holdCombined: -45 }, volumeDb: -50 }))
+		assert.ok(!quiet.includes('#4cff4c'), 'no bright bar below the start')
+		const x = (svg) => +svg.match(/<line x1="([0-9.]+)"[^>]*stroke-width="3"/)[1]
+		assert.equal(x(quiet), 12, 'fader line at the left end of the dial meter box')
+		assert.equal(x(renderVuStrip(view({ volumeDb: -Infinity }))), 12)
+	} finally {
+		setMeterFloor(-60)
+	}
+})
+
+test('two-key vertical fader keeps numbers off the seam at every start', () => {
+	try {
+		for (const f of [-60, -50, -40, -30]) {
+			setMeterFloor(f)
+			const top = renderButtonFader(view(), 'top')
+			for (const [, y] of top.matchAll(/<text x="[0-9.]+" y="([0-9.]+)"[^>]*fill="#aaa"/g)) assert.ok(Math.abs(+y - 144) > 6, `${f}: label at ${y}`)
+		}
+	} finally {
+		setMeterFloor(-60)
+	}
 })

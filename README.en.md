@@ -59,6 +59,10 @@ Changes reconnect right away. While OBS is not running the keys show **OFFLINE**
 
 Unfold **▸ Language** at the bottom of the settings screen and pick **English / 한국어 / 日本語**. The settings screen and the text on the keys (MUTED, OFFLINE and so on) change at once, for every action. The default is English. Action names in the action list do not change.
 
+## Meter range
+
+Unfold **▸ Meter range** at the bottom of the settings screen and pick where the meters start in **Start**: **-60 / -50 / -40 / -30 dB**. The default is -60 dB, as in OBS. The meters on VU Dial, Fader(2-Button) and Volume keys change at once. With -40, for example, only -40 to 0 dB is shown, wider, so speech levels are easier to read. Only what the meters show changes, not the volume range; sound below the start sits at the low end of the meter.
+
 ## Actions
 
 **Keys**

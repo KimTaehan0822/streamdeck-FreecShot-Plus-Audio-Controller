@@ -8,7 +8,7 @@ const NAME = 'Web-Socket Audio Controller for FreecShot Plus'
 
 const manifest = JSON.parse(readFileSync(`${OBS}/manifest.json`, 'utf8').replaceAll('com.haeunga0822.obs-audio', 'com.haeunga0822.freecshot-audio'))
 // Released on its own: the FreecShot Plus plugin keeps its own version.
-manifest.Version = '1.0.2.0'
+manifest.Version = '1.0.3.0'
 manifest.Name = NAME
 manifest.Category = NAME
 manifest.Description =

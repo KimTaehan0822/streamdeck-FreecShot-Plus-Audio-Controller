@@ -493,3 +493,16 @@ test('two-key vertical fader keeps numbers off the seam at every start', () => {
 		setMeterFloor(-60)
 	}
 })
+
+test('horizontal two-key fader numbers (14 px) keep a clear gap at every start', () => {
+	try {
+		setMeterFloor('-50')
+		const pair = renderButtonFader(view(), 'left') + renderButtonFader(view(), 'right')
+		assert.ok(!pair.includes('>-45<') && !pair.includes('>-35<'), 'numbers every 10 dB at -50, not 5')
+		setMeterFloor(-60)
+		const top = renderButtonFader(view(), 'top') + renderButtonFader(view(), 'bottom')
+		for (const db of [0, -10, -20, -40, -50, -60]) assert.ok(top.includes(`>${db}<`), `vertical default keeps ${db}`)
+	} finally {
+		setMeterFloor(-60)
+	}
+})

@@ -36,9 +36,9 @@ export function setMeterFloor(raw: unknown): boolean {
 	floor = next
 	return changed
 }
-/** Numbers on the scale every 5, 10 or 20 dB: the tightest that keeps them 24 px apart on a meter `length` px long. */
-export function labelStep(length: number, from: number): 5 | 10 | 20 {
-	for (const step of [5, 10] as const) if ((length * step) / -from >= 24) return step
+/** Numbers on the scale every 5, 10 or 20 dB: the tightest that keeps them `minGap` px apart (24 by default) on a meter `length` px long. */
+export function labelStep(length: number, from: number, minGap = 24): 5 | 10 | 20 {
+	for (const step of [5, 10] as const) if ((length * step) / -from >= minGap) return step
 	return 20
 }
 
@@ -130,7 +130,8 @@ const meterWithFader = (b: Box, vertical: boolean, v: KeyMeterView, gap: number,
  */
 function scaleMarks(b: Box, vertical: boolean, size: number, seam?: number): string {
 	const lo = meterFloor()
-	const labelEvery = labelStep(vertical ? b.h : b.w, lo)
+	// Side by side, wider numbers need more room: 24 px fits the 11 px labels, so scale it with the font size.
+	const labelEvery = labelStep(vertical ? b.h : b.w, lo, vertical ? 24 : (24 * size) / 11)
 	let out = ''
 	for (let db = 0; db >= lo; db -= 5) {
 		const p = along(b, vertical, (db - lo) / -lo, (db - lo) / -lo)

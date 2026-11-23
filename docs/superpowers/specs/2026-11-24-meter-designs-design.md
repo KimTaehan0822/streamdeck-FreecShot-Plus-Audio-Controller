@@ -19,8 +19,8 @@ TotalMix·TOPPING 플러그인처럼 OBS용(과 프릭샷플러스용) 플러그
 ## 동작
 
 - 모든 키의 설정 화면에 접힌 칸 **Meter design**(한국어 "미터 디자인", 일본어 "メーターデザイン")을 둔다. 전역 설정이다.
-  - **Dials** (`meterStyle`, 기본 `plugin`): 위 목록.
-  - **Buttons** (`meterStyleKey`, 기본 `same` = 다이얼과 같게) + 같은 목록.
+  - **Dials** (`meterDesign`, 기본 `plugin`; 키마다 있는 `meterStyle`과 겹치지 않게 이름을 바꿈): 위 목록.
+  - **Buttons** (`meterDesignKey`, 기본 `same` = 다이얼과 같게) + 같은 목록.
   - VU를 고르면 **VU 0 VU reference** (`vuReference`: -14 / -18 / -20 dBFS, 기본 -18) 칸만 나온다.
   - 이름과 한국어·일본어 번역은 TotalMix 목록 것을 그대로 쓴다.
 - 적용 대상: VU Dial(다이얼 줄), Fader(2-Button)(버튼 둘), Volume 키(버튼).

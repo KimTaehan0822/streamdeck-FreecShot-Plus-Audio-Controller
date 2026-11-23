@@ -62,10 +62,10 @@ export function renderMuteKey(v: MeterKeyBase & { muted: boolean; volumeDb: numb
 	return frame(KEY, KEY, (v.muted ? onLook(theme().muted) : '') + framed(words(v.bare, centredStack(v.name, v.muted ? t('muted') : '', 36, 40, onText(theme().muted)))), v.overlay)
 }
 
-/** Name at the top, value (or MUTED) in the middle, meter below. */
+/** Name at the top, volume in the middle (red while muted), meter below. */
 export function renderVolumeKey(v: MeterKeyBase & { volumeDb: number; muted: boolean; peek: boolean }): string {
-	const [text, fill] = v.muted && !v.peek ? [t('muted'), RED] : [dbText(v.volumeDb), WHITE]
-	return frame(KEY, KEY, bigName(v.name) + bigStatus(text, fill) + renderKeyMeter(v.meter), v.overlay)
+	// While muted the volume stays, in red.
+	return frame(KEY, KEY, bigName(v.name) + bigStatus(dbText(v.volumeDb), v.muted ? RED : WHITE) + renderKeyMeter(v.meter), v.overlay)
 }
 
 /** Talkback and PTT: the name is the big part, the text under it is smaller. */

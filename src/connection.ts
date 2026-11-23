@@ -1,5 +1,5 @@
 import { EventSubscription, OBSWebSocket } from 'obs-websocket-js/json'
-import { levelsFor, MeterTracker } from './obs/meter-state.js'
+import { levelsFor, rmsFor, MeterTracker } from './obs/meter-state.js'
 
 export interface ObsSettings {
 	host: string
@@ -16,6 +16,8 @@ export interface InputState {
 	balance: number
 	monitorType: string
 	meter: MeterTracker
+	/** Latest RMS per side (dB), for the VU needle design. */
+	rms: { left: number; right: number }
 }
 
 /** The part of obs-websocket-js this connection uses, so tests can pass a fake. */
@@ -205,7 +207,7 @@ export class ObsConnection {
 			get('GetInputAudioMonitorType', (r) => String(r.monitorType), 'OBS_MONITORING_TYPE_NONE'),
 		])
 		if (this.client !== client) return
-		this.state.set(uuid, { uuid, name, volumeMul: mul, volumeDb: toDb(mul), muted, balance, monitorType, meter: new MeterTracker() })
+		this.state.set(uuid, { uuid, name, volumeMul: mul, volumeDb: toDb(mul), muted, balance, monitorType, meter: new MeterTracker(), rms: { left: -Infinity, right: -Infinity } })
 		this.changed()
 	}
 
@@ -237,7 +239,9 @@ export class ObsConnection {
 			const now = this.now()
 			for (const m of d.inputs ?? []) {
 				const i = this.state.get(m.inputUuid)
-				if (i) i.meter.update(levelsFor(m.inputLevelsMul ?? [], i.muted, i.volumeMul), now)
+				if (!i) continue
+				i.meter.update(levelsFor(m.inputLevelsMul ?? [], i.muted, i.volumeMul), now)
+				i.rms = rmsFor(m.inputLevelsMul ?? [])
 			}
 		})
 	}

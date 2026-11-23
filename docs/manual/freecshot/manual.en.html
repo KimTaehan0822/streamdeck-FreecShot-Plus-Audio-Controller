@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Web-Socket Audio Controller for FreecShot Plus Stream Deck Plugin Manual</h1>
-<p><time datetime="2026-11-14">2026-11-14</time> · Version 1.0.4</p>
+<p><time datetime="2026-11-24">2026-11-24</time> · Version 1.1.0</p>
 <p>A plugin that controls the volume, mute, monitoring and balance of the <strong>FreecShot Plus</strong> audio mixer from a Stream Deck, and shows level meters on the keys and dial screens. It installs separately from the OBS edition of Web-Socket Audio Controller, so you can use OBS and FreecShot Plus side by side.</p>
 <p>Made by <strong>김탄2 (Kimtan2)</strong></p>
 
@@ -85,7 +85,7 @@
 <li><p>Bottom of the lower key: current audio level</p></li>
 <li><p>Two bars (L/R): the incoming level, running across both keys, on the FreecShot Plus scale of −60 to 0 dB</p></li>
 <li><p>Sky-blue line inside the bars: volume (fader) position</p></li>
-<li><p>MUTED: the source is muted (the bars keep moving in grey)</p></li>
+<li><p>MUTED: the source is muted. It takes the level's place; the volume stays where it is, in red (the bars keep moving in grey)</p></li>
 </ul>
 <p>The source name always takes one line so every fader has the same size. Long names end in …; enter a short name in <strong>Display name</strong>. This action cannot mute; add a Mute key for that.</p>
 </section>
@@ -103,7 +103,7 @@
 <li><p>Two bars (L/R): the incoming level (green → yellow → red)</p></li>
 <li><p>Sky-blue line inside the bars: volume position</p></li>
 <li><p>Bottom left / right: audio level / volume</p></li>
-<li><p>MUTED: the source is muted</p></li>
+<li><p>MUTED: the source is muted. It takes the level's place; the volume stays where it is, in red</p></li>
 </ul>
 <p>Tapping the screen also mutes. If that happens by accident, turn off <strong>Touch tap mutes</strong>. The level at the bottom left can show L and R separately (<code>L -14.0 R -18.0</code>) or one value (<strong>Combined</strong>, <code>-14.0 dB</code>); choose in <strong>Level text</strong>.</p>
 <p><strong>Changing the press actions:</strong> unfold <strong>▶ Press actions</strong> on the settings screen. (It is folded by default.)</p>
@@ -200,6 +200,9 @@
 <tr><td>Wide green</td><td>True Peak</td><td>yellow from −13 dB, red from −2 dB</td></tr>
 </tbody></table>
 <p>FreecShot Plus sends the plugin sample-peak values only, so Wide green matches FreecShot Plus in its colour ranges only; loud peaks may read slightly lower than in FreecShot Plus. Like FreecShot Plus, the meter falls back gradually and shows a peak-hold mark for 20 seconds.</p>
+<p><strong>Meter design:</strong> Unfold <strong>▶ Meter design</strong> at the bottom of the settings screen to pick how the meters look. <strong>Dials</strong> (VU Dial) and <strong>Buttons</strong> (Fader(2-Button), Volume keys) are picked separately; Buttons starts as <strong>Same as dials</strong>. The choice applies to every key at once.</p>
+<ul><li><strong>Plugin (default)</strong>: the look this plugin always had</li><li><strong>Mix Studio Classic</strong> / <strong>Mix Studio Modern</strong>: TotalMix FX's old / new style</li><li><strong>Topping on Plate</strong>: the TOPPING app look</li><li><strong>Big number</strong>: the volume in large digits</li><li><strong>VU Needle Drop</strong>: an analogue VU needle. It uses the RMS level FreecShot Plus sends as it is, and the needle moves as a ~300 ms average. Picking it shows <strong>VU 0 VU reference</strong> (-14 / -18 / -20 dBFS, default -18), where 0 VU sits.</li></ul>
+<p>The per-key <strong>Meter style</strong> and the <strong>Meter range</strong> below change only the <strong>Plugin (default)</strong> look, so they hide while another design is picked. The volume tops out at 0 dB, so on designs whose scale goes above 0 dB the fader mark stops at 0 dB.</p>
 <p><strong>Meter range:</strong> unfold <strong>▶ Meter range</strong> at the bottom of the settings screen and pick where the meters start in <strong>Start</strong>: -60 / -50 / -40 / -30 dB. The default is -60 dB, and the choice applies to every key at once. With -40, for example, only -40 to 0 dB is shown, wider, so speech levels are easier to read. Only what the meters show changes, not the volume range; sound below the start sits at the low end of the meter.</p>
 </section>
 

@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Web-Socket Audio Controller for FreecShot Plus Stream Deck プラグイン 取扱説明書</h1>
-<p><time datetime="2026-11-14">2026-11-14</time> · バージョン 1.0.4</p>
+<p><time datetime="2026-11-24">2026-11-24</time> · バージョン 1.1.0</p>
 <p>Stream Deck から <strong>FreecShot Plus</strong> の音声ミキサーの音量、ミュート、モニタリング、バランスを操作し、キーとダイヤルの画面でレベルメーターを表示するプラグインです。OBS 版の Web-Socket Audio Controller とは別にインストールされるので、OBS と FreecShot Plus を同時に使えます。</p>
 <p>作者: <strong>김탄2(Kimtan2)</strong></p>
 
@@ -85,7 +85,7 @@
 <li><p>下のキーの下部: 現在の音声レベル</p></li>
 <li><p>2本のバー(L/R): 入ってくる音の大きさ。2つのキーにまたがってつながり、目盛りは FreecShot Plus と同じ −60 〜 0 dB</p></li>
 <li><p>バーの中の水色の線: 音量(フェーダー)の位置</p></li>
-<li><p>MUTED: ミュート中 (バーは灰色で動き続けます)</p></li>
+<li><p>MUTED: ミュート中。音声レベルの位置に表示され、音量の値はそのままの位置に赤で残ります (バーは灰色で動き続けます)</p></li>
 </ul>
 <p>フェーダーの大きさをそろえるため、ソース名は常に1行で表示します。長い名前は末尾が … になるので、<strong>Display name</strong> に短い名前を入れてください。このアクションではミュートできません。ミュートもキーで行うなら Mute アクションを追加してください。</p>
 </section>
@@ -103,7 +103,7 @@
 <li><p>2本のバー(L/R): 入ってくる音の大きさ (緑 → 黄 → 赤)</p></li>
 <li><p>バーの中の水色の線: 音量の位置</p></li>
 <li><p>左下 / 右下: 音声レベル / 音量</p></li>
-<li><p>MUTED: ミュート中</p></li>
+<li><p>MUTED: ミュート中。音声レベルの位置に表示され、音量の値はそのままの位置に赤で残ります</p></li>
 </ul>
 <p>画面をタッチしてもミュートします。誤ってタッチしてしまう場合は <strong>Touch tap mutes</strong> をオフにしてください。左下のレベルは <strong>Level text</strong> で L/R 別々(<code>L -14.0 R -18.0</code>)か一つの値(<strong>Combined</strong>、<code>-14.0 dB</code>)を選べます。</p>
 <p><strong>押したときの動作を変える:</strong> 設定画面の <strong>▶ Press actions</strong> を押して開きます。(普段は閉じています)</p>
@@ -200,6 +200,9 @@
 <tr><td>Wide green</td><td>トゥルーピーク</td><td>黄 −13 dB から、赤 −2 dB から</td></tr>
 </tbody></table>
 <p>FreecShot Plus はプラグインにサンプルピークの値だけを送ります。そのため Wide green は色の範囲だけが FreecShot Plus と同じで、大きな音が出たときに FreecShot Plus の画面よりわずかに低く見えることがあります。メーターは FreecShot Plus と同じようにピークがゆっくり下がり、ピークホールドの印が 20 秒残ります。</p>
+<p><strong>メーターデザイン:</strong> 設定画面のいちばん下の <strong>▶ Meter design</strong>(日本語設定では<strong>メーターデザイン</strong>)を開き、メーターの見た目を選びます。<strong>ダイヤル</strong>(VU Dial)と<strong>ボタン</strong>(Fader(2-Button)、Volume キー)は別々に選べ、ボタンの初期値は<strong>ダイヤルと同じ</strong>です。すべてのキーに一度に適用されます。</p>
+<ul><li><strong>プラグイン標準</strong>: これまでの見た目(初期値)</li><li><strong>Mix Studio Classic</strong> / <strong>Mix Studio Modern</strong>: TotalMix FX の旧スタイル / 新スタイル</li><li><strong>Topping on Plate</strong>: TOPPING アプリの見た目</li><li><strong>大きな dB 表示</strong>: 音量を大きな数字で表示</li><li><strong>VU Needle Drop</strong>: アナログ VU 針。FreecShot Plus が送る RMS 値をそのまま使い、針は約 300ms の平均で動きます。選ぶと表示される <strong>VU 0 VU 基準</strong>(-14 / -18 / -20 dBFS、初期値 -18)で 0 VU の位置を決めます。</li></ul>
+<p>キーごとの <strong>Meter style</strong> と下の<strong>メーター範囲</strong>は<strong>プラグイン標準</strong>の見た目にだけ適用されるため、ほかのデザインを選ぶとその欄は隠れます。音量は最大 0 dB なので、目盛りが 0 dB より上まであるデザインでもフェーダー表示は 0 dB で止まります。</p>
 <p><strong>メーター範囲:</strong> 設定画面のいちばん下の <strong>▶ Meter range</strong>(日本語設定では<strong>メーター範囲</strong>)を開き、<strong>Start</strong>(開始点)でメーターが始まる値を -60 / -50 / -40 / -30 dB から選びます。初期値は -60 dB で、選ぶとすぐにすべてのキーのメーターに適用されます。たとえば -40 を選ぶと -40 〜 0 dB だけが広く表示され、話し声の範囲が見やすくなります。変わるのは表示の範囲だけで音量の調整範囲はそのままです。開始点より小さい音はメーターの端に表示されます。</p>
 </section>
 

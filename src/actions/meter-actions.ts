@@ -2,7 +2,9 @@ import { action, type DialDownEvent, type DialRotateEvent, type DialUpEvent, typ
 import type { JsonObject } from '@elgato/utils'
 import type { ObsConnection } from '../connection.js'
 import { renderMuteKey, renderVolumeKey } from '../render/keys.js'
+import { designFor, toMeterInput } from '../render/design.js'
 import { renderButtonFader, renderVuStrip, type FaderRole } from '../render/meter.js'
+import { dbText } from '../obs/volume.js'
 import type { RenderContext } from '../runtime/base-action.js'
 import { num, pick, stepOf } from '../runtime/settings.js'
 import { ID, SourceAction, type MuteOp } from './common.js'
@@ -19,7 +21,9 @@ export class VuDialAction extends SourceAction {
 	private readonly presses = new Map<string, { turned: boolean; fired: Set<string> }>()
 
 	protected render(s: JsonObject, ctx: RenderContext): string {
-		return renderVuStrip(this.meterView(s, ctx))
+		const v = this.meterView(s, ctx)
+		const design = designFor('dial')
+		return design ? design.strip(toMeterInput(v, design)) : renderVuStrip(v)
 	}
 
 	override onWillDisappear(ev: WillDisappearEvent<JsonObject>): void {
@@ -70,7 +74,10 @@ export class VuDialAction extends SourceAction {
 @action({ UUID: ID + 'button-fader' })
 export class ButtonFaderAction extends SourceAction {
 	protected render(s: JsonObject, ctx: RenderContext): string {
-		return renderButtonFader(this.meterView(s, ctx), pick(s.role, ROLES) ?? 'top')
+		const v = this.meterView(s, ctx)
+		const role = pick(s.role, ROLES) ?? 'top'
+		const design = designFor('key')
+		return design ? design.pair(toMeterInput(v, design), role) : renderButtonFader(v, role)
 	}
 
 	override onKeyDown(ev: KeyDownEvent<JsonObject>): void {
@@ -104,6 +111,11 @@ export class VolumeAction extends SourceAction {
 	protected render(s: JsonObject, ctx: RenderContext): string {
 		const v = this.meterView(s, ctx)
 		const overlay = v.overlay === 'none' && !this.valid(s) ? 'config' : v.overlay
+		const design = designFor('key')
+		if (design) {
+			const m = toMeterInput(v, design)
+			return design.key({ title: v.name, value: dbText(v.volumeDb), meter: { leftDb: m.leftDb, rightDb: m.rightDb, fader: m.fader, muted: v.muted }, overlay })
+		}
 		return renderVolumeKey({ name: v.name, volumeDb: v.volumeDb, muted: v.muted, peek: v.peek, meter: this.keyMeter(v), overlay })
 	}
 

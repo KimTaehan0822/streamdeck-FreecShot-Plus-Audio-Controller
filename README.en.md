@@ -2,7 +2,7 @@
 
 [한국어](README.md) | **English** | [日本語](README.ja.md)
 
-**Version:** 1.0.4
+**Version:** 1.1.0
 
 Control the **FreecShot Plus** audio mixer with the keys and dials of an Elgato Stream Deck. Volume, mute, push to talk, talkback, audio monitoring and balance are one key away, and the keys and dial screens show level meters.
 
@@ -47,6 +47,18 @@ Before changing anything, the button backs up the original file as `config.json.
 ### 3. Make your first key
 
 Put **Mute** on a key and pick an audio source such as your microphone in **Source**. While muted, the key gets a red frame and a faint red tint.
+
+## Meter design
+
+Unfold **▸ Meter design** at the bottom of the settings screen to pick how the meters look. **Dials** (VU Dial) and **Buttons** (Fader(2-Button), Volume keys) are picked separately; Buttons starts as **Same as dials**. The choice applies to every key at once.
+
+- **Plugin (default)**: the look this plugin always had
+- **Mix Studio Classic** / **Mix Studio Modern**: TotalMix FX's old / new style
+- **Topping on Plate**: the TOPPING app look
+- **Big number**: the volume in large digits
+- **VU Needle Drop**: an analogue VU needle. It uses the RMS level FreecShot Plus sends as it is, and the needle moves as a ~300 ms average. Picking it shows **VU 0 VU reference** (-14 / -18 / -20 dBFS, default -18), where 0 VU sits.
+
+The per-key **Meter style** and the **Meter range** below change only the **Plugin (default)** look, so they hide while another design is picked. The volume tops out at 0 dB, so on designs whose scale goes above 0 dB the fader mark stops at 0 dB.
 
 ## Meter range
 

@@ -2,7 +2,7 @@
 
 **한국어** | [English](README.en.md) | [日本語](README.ja.md)
 
-**버전:** 1.0.4
+**버전:** 1.1.0
 
 Elgato Stream Deck의 키와 다이얼로 **프릭샷플러스(FreecShot Plus)** 오디오 믹서를 조작하는 플러그인입니다. 볼륨, 뮤트, Push to talk, 토크백, 오디오 모니터링, 밸런스를 키 하나로 다루고, 키와 다이얼 화면에서 레벨 미터를 볼 수 있습니다.
 
@@ -47,6 +47,18 @@ OBS용 [Web-Socket Audio Controller](https://github.com/KimTaehan0822/streamdeck
 ### 3. 첫 키 만들기
 
 **Mute**를 키에 놓고 **Source**에서 마이크 같은 오디오 소스를 고릅니다. 음소거 중에는 빨간 테두리와 옅은 빨간 바탕이 생깁니다.
+
+## 미터 디자인
+
+설정 화면 맨 아래의 **▸ Meter design**(한국어 설정에서는 **미터 디자인**)을 펼쳐 미터 모양을 고릅니다. **다이얼**(VU Dial)과 **버튼**(Fader(2-Button), Volume 키)을 따로 고를 수 있고, 버튼의 처음 값은 **다이얼과 같게**입니다. 모든 키에 한 번에 적용됩니다.
+
+- **플러그인 기본**: 지금까지의 플러그인 모양 (처음 값)
+- **Mix Studio Classic** / **Mix Studio Modern**: TotalMix FX의 옛 스타일 / 새 스타일
+- **Topping on Plate**: TOPPING 앱 모양
+- **큰 dB 숫자**: 볼륨을 크게 보여 주는 모양
+- **VU Needle Drop**: 아날로그 VU 바늘. 프릭샷플러스가 보내는 RMS 값을 그대로 쓰고, 바늘은 약 300ms 평균으로 움직입니다. VU를 고르면 나오는 **VU 0 VU 기준**(-14 / -18 / -20 dBFS, 처음 값 -18)에서 0 VU 위치를 정합니다.
+
+키마다 있는 **Meter style**과 아래의 **미터 범위**는 **플러그인 기본** 모양에만 적용되므로, 다른 모양을 고르면 그 칸이 숨겨집니다. 볼륨은 최대 0 dB라서, 눈금이 0 dB보다 위까지 있는 모양에서도 페이더 표시는 0 dB에서 멈춥니다.
 
 ## 미터 범위
 

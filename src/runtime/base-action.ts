@@ -11,7 +11,8 @@ import type { JsonObject } from '@elgato/utils'
 import type { ObsConnection } from '../connection.js'
 import { svgDataUrl, type Overlay } from '../render/svg.js'
 import { HoldRepeater } from './hold.js'
-import { Redrawer } from './redraw.js'
+import { forgetNeedle, needleMoving, smoothNeedle } from '../render/meters/vu.js'
+import { REDRAW_MS, Redrawer } from './redraw.js'
 
 export interface RenderContext {
 	dial: boolean
@@ -90,6 +91,7 @@ export abstract class ObsAction<S extends JsonObject> extends SingletonAction<S>
 
 	override onWillDisappear(ev: WillDisappearEvent<S>): void {
 		this.instances.get(ev.action.id)?.redrawer.dispose()
+		forgetNeedle(ev.action.id)
 		this.instances.delete(ev.action.id)
 		this.holds.get(ev.action.id)?.stop()
 		this.holds.delete(ev.action.id)
@@ -130,7 +132,19 @@ export abstract class ObsAction<S extends JsonObject> extends SingletonAction<S>
 				userTitle: !!instance.titles[instance.state ?? 0],
 				id: key,
 			}
-			instance.redrawer.request(() => svgDataUrl(this.render(instance.settings, ctx)))
+			// A VU needle still easing toward its level asks for another frame, even when no new level arrives.
+			const draw = (): string => {
+				smoothNeedle(key)
+				needleMoving()
+				try {
+					const image = svgDataUrl(this.render(instance.settings, ctx))
+					if (needleMoving()) setTimeout(() => instance.redrawer.request(draw), REDRAW_MS).unref()
+					return image
+				} finally {
+					smoothNeedle(undefined)
+				}
+			}
+			instance.redrawer.request(draw)
 		}
 	}
 

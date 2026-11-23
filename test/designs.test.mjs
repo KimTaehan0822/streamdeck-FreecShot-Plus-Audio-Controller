@@ -130,3 +130,22 @@ test('Big number vertical fader keeps every dB mark', () => {
 	const both = SHARED_DESIGNS.big.pair(input(), 'top') + SHARED_DESIGNS.big.pair(input(), 'bottom')
 	for (const m of ['>0<', '>-20<', '>-40<', '>-60<']) assert.ok(both.includes(m), m)
 })
+
+test('every design shows the L/R level whole, at one size whatever the values', () => {
+	const LEVELS = ['L -12.0 R -20.0', 'L -45.0 R -52.0', 'L -inf R -inf', 'L -5.0 R -99.0']
+	for (const name of NAMES) {
+		const d = SHARED_DESIGNS[name]
+		for (const part of ['strip', 'top', 'bottom', 'left', 'right']) {
+			const sizes = new Set()
+			for (const levelText of LEVELS) {
+				const i = input({ name: 'Microphone', levelText })
+				const svg = part === 'strip' ? d.strip(i) : d.pair(i, part)
+				const hit = [...svg.matchAll(/<text[^>]*font-size="([\d.]+)"[^>]*>([^<]*)/g)].find((m) => m[2].startsWith('L '))
+				if (!hit) continue
+				assert.equal(hit[2], levelText, `${name} ${part} cut`)
+				sizes.add(hit[1])
+			}
+			assert.ok(sizes.size <= 1, `${name} ${part} sizes ${[...sizes]}`)
+		}
+	}
+})

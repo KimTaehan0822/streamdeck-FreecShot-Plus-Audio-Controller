@@ -1,7 +1,7 @@
 // "VU needle": amber analogue VU face, needle on the louder of L and R (mockup approved 2026-11-16).
 import { t } from '../../i18n.js'
 import { KEY, frame, plainText } from '../svg.js'
-import { fitSize, fitText } from './measure.js'
+import { fitSize, fitText, levelSize } from './measure.js'
 import { nameBlock } from './text.js'
 import { MUTED_RED, base, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
@@ -131,9 +131,8 @@ function face(x: number, y: number, w: number, h: number, peakDb: number, muted:
 }
 
 const loud = (l: number, r: number) => Math.max(safeDb(l), safeDb(r))
-const text = (t: string, x: number, cy: number, size: number, maxWidth: number, fill = WHITE) => {
+const text = (t: string, x: number, cy: number, size: number, maxWidth: number, fill = WHITE, s = fitSize(t, size, maxWidth, 9)) => {
 	if (!t) return ''
-	const s = fitSize(t, size, maxWidth, 9)
 	return plainText(x, base(cy, s), fitText(t, s, maxWidth + 4), { size: s, fill })
 }
 
@@ -162,7 +161,7 @@ function pair(v: MeterInput, role: FaderRole): string {
 		b += text(v.faderText, 72, 50, 24, 132, v.muted ? MUTED_RED : WHITE)
 		b += face(6, 64, 132, 190, db, v.muted, 'vp', { cx: 72, pivot: 250, r: 150, half: 18, vu: [72, 214] })[0]
 		// TotalMix's own peak level: the needle is an estimate, the number stays the real measured value.
-		b += v.muted ? text(t('muted'), 72, 272, 20, 128, MUTED_RED) : text(v.levelText, 72, 272, 20, 128)
+		b += v.muted ? text(t('muted'), 72, 272, 20, 128, MUTED_RED) : text(v.levelText, 72, 272, 20, 128, WHITE, levelSize(v.levelText, 20, 128, 9))
 	} else {
 		b = nameBlock(v.name, { x: 72, top: 7, width: 124, height: 24, maxLines: 1, size: 20, minSize: 12 })
 		b += text(v.faderText, 216, 19, 20, 124, v.muted ? MUTED_RED : WHITE)

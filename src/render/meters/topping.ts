@@ -1,7 +1,7 @@
 // TOPPING E2x2 OTG plugin look, ported from streamdeck-topping-e2x2 (src/render/meter.ts, keys.ts, theme.ts, protocol/meter.ts).
 import { t } from '../../i18n.js'
 import { KEY, frame, plainText } from '../svg.js'
-import { fitSize, fitText } from './measure.js'
+import { fitSize, fitText, levelSize } from './measure.js'
 import { base, clamp01, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
 const BG = '#1F1F1F'
@@ -90,7 +90,8 @@ function strip(v: MeterInput): string {
 	if (fader !== undefined) b += cap(12 + 176 * fader, 46, 12, 34, false)
 	// While muted, MUTED takes the level's place and the volume stays, in red.
 	const [left, leftFill] = v.muted ? [t('muted'), RED] : [v.levelText, DIM]
-	b += plainText(6, base(83, 19), fitText(left, 19, 80), { size: 19, fill: leftFill, anchor: 'start' })
+	const ls = v.muted ? 19 : levelSize(left, 19, 108, 10)
+	b += plainText(6, base(83, ls), fitText(left, ls, 112), { size: ls, fill: leftFill, anchor: 'start' })
 	b += plainText(194, base(83, 19), fitText(v.faderText, 19, 125), { size: 19, fill: v.muted ? RED : WHITE, anchor: 'end' })
 	return frame(200, 100, b, v.overlay)
 }
@@ -139,12 +140,11 @@ function pair(v: MeterInput, role: FaderRole): string {
 		}
 		if (fader !== undefined && Math.abs(local(fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(fader), 111, CAP, 30, false)
 	}
-	const row = (t: string, cy: number, size: number, fill: string) => {
-		const s = fitSize(t, size, 132, 10)
+	const row = (t: string, cy: number, size: number, fill: string, s = fitSize(t, size, 132, 10)) => {
 		return plainText(72, base(cy, s), fitText(t, s, 136), { size: s, fill })
 	}
 	// While muted, MUTED takes the level's place and the volume stays, in red.
-	const level = (cy: number, size: number, fill: string) => (v.muted ? row(t('muted'), cy, size, RED) : v.levelText === '' ? '' : row(v.levelText, cy, size, fill))
+	const level = (cy: number, size: number, fill: string) => (v.muted ? row(t('muted'), cy, size, RED) : v.levelText === '' ? '' : row(v.levelText, cy, size, fill, levelSize(v.levelText, size, 132, 10)))
 	const volumeFill = v.muted ? RED : WHITE
 	if (role === 'top') b = (v.name ? plate(21, 34, plateName(v.name, 21, 24)) : '') + row(v.faderText, 58, 26, volumeFill) + b
 	// Left key: the level sits in the middle of the free space between the name plate (bottom 38) and the fader cap (top 96).

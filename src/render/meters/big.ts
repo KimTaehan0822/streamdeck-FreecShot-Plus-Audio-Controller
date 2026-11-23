@@ -1,7 +1,7 @@
 // "Big number": thin large fader value and two slim L/R bars, after the TOPPING app's volume screen (mockup approved 2026-11-16).
 import { t } from '../../i18n.js'
 import { KEY, escapeXml, frame, plainText } from '../svg.js'
-import { fitSize, fitText, textWidth } from './measure.js'
+import { fitSize, fitText, levelSize, textWidth } from './measure.js'
 import { nameBlock } from './text.js'
 import { MUTED_RED, base, clamp01, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
@@ -42,6 +42,10 @@ function bigNumber(cx: number, baseline: number, text: string, size: number, max
 	return `<text x="${n(cx)}" y="${n(baseline)}" font-family="Segoe UI" font-weight="300" font-size="${s}" fill="${fill}" text-anchor="middle">${escapeXml(shown)}${tspan}</text>`
 }
 
+const level = (text: string, cx: number, cy: number, size: number, maxWidth: number, fill = WHITE) => {
+	const s = levelSize(text, size, maxWidth, 10)
+	return plainText(cx, base(cy, s), fitText(text, s, maxWidth + 4), { size: s, fill })
+}
 const mutedText = (cx: number, cy: number, size: number) => plainText(cx, base(cy, size), t('muted'), { size, fill: MUTED_RED })
 const name = (text: string, x: number, cy: number, size: number, maxWidth: number, anchor: 'start' | 'middle' = 'middle', fill = WHITE) => {
 	if (!text) return ''
@@ -69,7 +73,7 @@ function marks(x: number, y: number, len: number, vertical: boolean, seam: numbe
 	let out = ''
 	for (const db of [0, -20, -40, -60]) {
 		const p = vertical ? y + len * (1 - barFrac(db)) : x + len * barFrac(db)
-		if (Math.abs(p - seam) < 10) continue
+		if (Math.abs(p - seam) < 7) continue
 		out += vertical
 			? plainText(n(x), base(p, size), String(db), { size, fill: GREY, anchor: 'start' })
 			: plainText(n(p), base(y, size), String(db), { size, fill: GREY })
@@ -89,11 +93,11 @@ function pair(v: MeterInput, role: FaderRole): string {
 	if (vertical) {
 		b = nameBlock(v.name, { x: 72, top: 2, width: 132, height: 30, maxLines: 1, size: 26, minSize: 13 })
 		b += bigNumber(72, 80, v.faderText, 44, 136, v.muted ? MUTED_RED : WHITE)
-		b += thinBars(40, 98, 20, 168, 10, v.leftDb, v.rightDb, v.muted, 'bp', true) + marks(96, 98, 168, true, KEY, 12)
-		b += v.muted ? mutedText(72, 278, 22) : name(v.levelText, 72, 278, 22, 136)
+		b += thinBars(40, 98, 20, 160, 10, v.leftDb, v.rightDb, v.muted, 'bp', true) + marks(96, 98, 160, true, KEY, 12)
+		b += v.muted ? mutedText(72, 278, 22) : level(v.levelText, 72, 279, 22, 136)
 	} else {
 		b = nameBlock(v.name, { x: 72, top: 4, width: 132, height: 38, maxLines: 1, size: 32, minSize: 14 })
-		b += v.muted ? mutedText(72, 60, 24) : name(v.levelText, 72, 60, 24, 132, 'middle', GREY)
+		b += v.muted ? mutedText(72, 60, 24) : level(v.levelText, 72, 60, 24, 132, GREY)
 		b += bigNumber(216, 66, v.faderText, 58, 136, v.muted ? MUTED_RED : WHITE)
 		b += thinBars(12, 84, 264, 11, 6, v.leftDb, v.rightDb, v.muted, 'bp') + marks(12, 126, 264, false, KEY, 13)
 	}

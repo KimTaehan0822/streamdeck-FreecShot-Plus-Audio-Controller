@@ -32,6 +32,10 @@ export function fitText(text: string, size: number, maxWidth = 136): string {
 	return out + '…'
 }
 
+/** A level text's size, taken from its widest form so it always fits and keeps one size as the values move. */
+export const levelSize = (text: string, size: number, maxWidth: number, min: number): number =>
+	fitSize(text.startsWith('L ') ? 'L -60.0 R -60.0' : '-60.0 dB', size, maxWidth, min)
+
 /** Font size at which text fits maxWidth, never above size nor below min (fitText still cuts what min cannot fit). */
 export function fitSize(text: string, size: number, maxWidth: number, min: number): number {
 	const width = textWidth(text, size)

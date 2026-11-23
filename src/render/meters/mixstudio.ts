@@ -2,7 +2,7 @@
 // (src/render/meter.ts, where they are styles of its own meter) into the shared MeterDesign form. Values arrive in dB.
 import { t } from '../../i18n.js'
 import { KEY, NAME_WIDTH, frame, plainText } from '../svg.js'
-import { fitSize, fitText } from './measure.js'
+import { fitSize, fitText, levelSize } from './measure.js'
 import { base, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
 type Look = 'classic' | 'modern'
@@ -139,7 +139,8 @@ function strip(look: Look, v: MeterInput): string {
 	if (v.badge && badge) body += plainText(196, base(14, 15), badge, { size: 15, fill: v.badge.fill, anchor: 'end' })
 	// While muted, MUTED takes the level's place and the volume stays, in red.
 	const [left, leftFill] = v.muted ? [t('muted'), RED] : [v.levelText, WHITE]
-	body += plainText(4, base(82, 19), fitText(left, 19, 96), { size: 19, fill: leftFill, anchor: 'start' })
+	const ls = v.muted ? 19 : levelSize(left, 19, 110, 10)
+	body += plainText(4, base(82, ls), fitText(left, ls, 114), { size: ls, fill: leftFill, anchor: 'start' })
 	body += plainText(196, base(82, 19), fitText(v.faderText, 19, 125), { size: 19, fill: v.muted ? RED : WHITE, anchor: 'end' })
 	return frame(200, 100, body, v.overlay)
 }
@@ -178,7 +179,7 @@ function pair(look: Look, v: MeterInput, role: FaderRole): string {
 		if (kind === 'name') body += text(v.name, cy, WHITE, KEY - 8, fitSize(v.name, size, NAME_WIDTH, 7 * u))
 		// While muted the volume stays, in red, and MUTED takes the level's row.
 		else if (kind === 'value') body += text(v.faderText, cy, v.muted ? RED : WHITE)
-		else body += v.muted ? text(t('muted'), cy, RED) : text(v.levelText, cy)
+		else body += v.muted ? text(t('muted'), cy, RED) : text(v.levelText, cy, WHITE, KEY, levelSize(v.levelText, size, KEY - 8, 7 * u))
 	}
 	return frame(KEY, KEY, body, v.overlay)
 }

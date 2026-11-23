@@ -61,6 +61,18 @@ Changes reconnect right away. While OBS is not running the keys show **OFFLINE**
 
 Unfold **▸ Language** at the bottom of the settings screen and pick **English / 한국어 / 日本語**. The settings screen and the text on the keys (MUTED, OFFLINE and so on) change at once, for every action. The default is English. Action names in the action list do not change.
 
+## Meter design
+
+Unfold **▸ Meter design** at the bottom of the settings screen to pick how the meters look. **Dials** (VU Dial) and **Buttons** (Fader(2-Button), Volume keys) are picked separately; Buttons starts as **Same as dials**. The choice applies to every key at once.
+
+- **Plugin (default)**: the OBS look this plugin always had
+- **Mix Studio Classic** / **Mix Studio Modern**: TotalMix FX's old / new style
+- **Topping on Plate**: the TOPPING app look
+- **Big number**: the volume in large digits
+- **VU Needle Drop**: an analogue VU needle. It uses the RMS level OBS sends as it is, and the needle moves as a ~300 ms average. Picking it shows **VU 0 VU reference** (-14 / -18 / -20 dBFS, default -18), where 0 VU sits.
+
+The per-key **Meter style** and the **Meter range** below change only the **Plugin (default)** look, so they hide while another design is picked. OBS volume tops out at 0 dB, so on designs whose scale goes above 0 dB the fader mark stops at 0 dB.
+
 ## Meter range
 
 Unfold **▸ Meter range** at the bottom of the settings screen and pick where the meters start in **Start**: **-60 / -50 / -40 / -30 dB**. The default is -60 dB, as in OBS. The meters on VU Dial, Fader(2-Button) and Volume keys change at once. With -40, for example, only -40 to 0 dB is shown, wider, so speech levels are easier to read. Only what the meters show changes, not the volume range; sound below the start sits at the low end of the meter.

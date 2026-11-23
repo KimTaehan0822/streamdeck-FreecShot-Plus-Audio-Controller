@@ -6,6 +6,7 @@ import { FLAVOUR } from './flavour.js'
 import { defaultSetupDeps, runFreecshotSetup } from './freecshot/setup.js'
 import { language, setLanguage, t } from './i18n.js'
 import { meterActions } from './actions/meter-actions.js'
+import { setMeterDesigns } from './render/design.js'
 import { setMeterFloor } from './render/meter.js'
 import { otherActions } from './actions/other.js'
 import { PttAction } from './actions/ptt.js'
@@ -75,6 +76,11 @@ function applyMeterFloor(raw: { meterFloor?: unknown }): void {
 	if (setMeterFloor(raw.meterFloor)) for (const action of actions) action.redrawAll()
 }
 
+/** The meter designs (dials, buttons, VU 0 VU reference) are global too and only redraw the keys. */
+function applyMeterDesign(raw: { meterDesign?: unknown; meterDesignKey?: unknown; vuReference?: unknown }): void {
+	if (setMeterDesigns(raw.meterDesign, raw.meterDesignKey, raw.vuReference)) for (const action of actions) action.redrawAll()
+}
+
 /** The last global settings seen (connection and language), for the auto setup to start from. */
 let globals: JsonObject = {}
 
@@ -95,6 +101,7 @@ streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
 	globals = ev.settings
 	applyLanguage(ev.settings)
 	applyMeterFloor(ev.settings)
+	applyMeterDesign(ev.settings)
 	clearTimeout(debounce)
 	debounce = setTimeout(() => apply(ev.settings), 500)
 })
@@ -104,4 +111,5 @@ const initial = await streamDeck.settings.getGlobalSettings()
 globals = initial
 applyLanguage(initial)
 applyMeterFloor(initial)
+applyMeterDesign(initial)
 apply(initial)

@@ -57,7 +57,7 @@ const n = (x: number) => +x.toFixed(2)
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x))
 const rect = (x: number, y: number, w: number, h: number, fill: string, rx = 0) =>
 	w > 0 && h > 0 ? `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}"${rx ? ` rx="${rx}"` : ''} fill="${fill}"/>` : ''
-const levelText = (db: number) => (db === -Infinity || db < -99 ? '-inf' : db.toFixed(1))
+export const levelText = (db: number) => (db === -Infinity || db < -99 ? '-inf' : db.toFixed(1))
 
 interface Box {
 	x: number

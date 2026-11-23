@@ -61,3 +61,31 @@ test('Mix Studio Classic and Modern keep their TotalMix colours', () => {
 	assert.ok(SHARED_DESIGNS.modern.strip(input()).includes('rgb(25,209,32)'))
 	assert.ok(SHARED_DESIGNS.classic.pair(input({ muted: true }), 'bottom').includes('stroke="rgb(255,57,31)"'))
 })
+
+test('the dial and button designs follow the global settings', async () => {
+	const { setMeterDesigns, designFor, toMeterInput } = await import('../dist/render/design.js')
+	try {
+		assert.equal(setMeterDesigns('vu', 'same', '-18'), true)
+		assert.equal(designFor('dial'), SHARED_DESIGNS.vu)
+		assert.equal(designFor('key'), SHARED_DESIGNS.vu)
+		setMeterDesigns('obs', undefined, undefined)
+		assert.equal(designFor('dial'), undefined)
+		assert.equal(designFor('key'), undefined)
+		setMeterDesigns('big', 'plugin', '-18')
+		assert.equal(designFor('dial'), SHARED_DESIGNS.big)
+		assert.equal(designFor('key'), undefined)
+		assert.equal(setMeterDesigns('big', 'plugin', '-18'), false)
+		assert.equal(setMeterDesigns('big', 'plugin', '-14'), true)
+
+		const levels = { left: -10, right: -16, combined: -10, holdLeft: -8, holdRight: -14, holdCombined: -8 }
+		const view = (over = {}) => ({ name: 'Mic', volumeDb: -6, levels, rms: { left: -30, right: -40 }, muted: false, peek: false, style: 'standard', channels: 'lr', overlay: 'none', ...over })
+		assert.equal(toMeterInput(view(), SHARED_DESIGNS.vu).leftDb, -30)
+		assert.equal(toMeterInput(view(), SHARED_DESIGNS.big).leftDb, -10)
+		assert.deepEqual(toMeterInput(view(), SHARED_DESIGNS.big).fader, { db: -6 })
+		assert.equal(toMeterInput(view({ channels: 'combined' }), SHARED_DESIGNS.big).levelText, '-10.0 dB')
+		const silent = toMeterInput(view({ volumeDb: -Infinity }), SHARED_DESIGNS.big)
+		assert.ok(!SHARED_DESIGNS.big.strip(silent).includes('NaN'))
+	} finally {
+		setMeterDesigns('plugin', 'same', undefined)
+	}
+})

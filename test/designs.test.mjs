@@ -117,3 +117,16 @@ test('muted: every design keeps the volume in red, and shows MUTED where the lev
 		assert.ok(!(d.strip(m) + vertical + horizontal).includes('-12.0'), `${name} level hidden while muted`)
 	}
 })
+
+test('Big number dial: the L/R level is not cut, and the name keeps its size as the level changes', () => {
+	const lr = (levelText) => SHARED_DESIGNS.big.strip(input({ name: 'Microphone Aux', levelText }))
+	assert.ok(lr('L -12.0 R -20.0').includes('L -12.0 R -20.0'))
+	const nameSize = (svg) => /font-size="(\d+)"[^>]*>Micro/.exec(svg)?.[1]
+	assert.equal(nameSize(lr('L -5.0 R -5.0')), nameSize(lr('L -45.0 R -45.0')))
+	assert.equal(nameSize(lr('L -inf R -inf')), nameSize(lr('L -45.0 R -45.0')))
+})
+
+test('Big number vertical fader keeps every dB mark', () => {
+	const both = SHARED_DESIGNS.big.pair(input(), 'top') + SHARED_DESIGNS.big.pair(input(), 'bottom')
+	for (const m of ['>0<', '>-20<', '>-40<', '>-60<']) assert.ok(both.includes(m), m)
+})

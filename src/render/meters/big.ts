@@ -51,8 +51,10 @@ const name = (text: string, x: number, cy: number, size: number, maxWidth: numbe
 
 function strip(v: MeterInput): string {
 	// Top row: name left, level (or the badge, which takes priority) right.
-	const right = v.badge ? { text: fitText(v.badge.text, 15, 60), fill: v.badge.fill, size: 15 } : { text: fitText(v.levelText, 14, 76), fill: GREY, size: 14 }
-	const rightW = textWidth(right.text, right.size)
+	// The level's room is fixed by its widest form, so the name does not resize as the level moves.
+	const room = v.badge ? 60 : Math.ceil(textWidth(v.levelText.startsWith('L ') ? 'L -60.0 R -60.0' : '-60.0 dB', 14))
+	const right = v.badge ? { text: fitText(v.badge.text, 15, room), fill: v.badge.fill, size: 15 } : { text: fitText(v.levelText, 14, room + 4), fill: GREY, size: 14 }
+	const rightW = v.badge ? textWidth(right.text, right.size) : room
 	let b = name(v.name, 8, 14, 18, 184 - rightW - 8, 'start', GREY)
 	// While muted, MUTED takes the level's place (a badge keeps it) and the volume stays, in red.
 	if (!v.muted || v.badge) b += plainText(192, base(14, right.size), right.text, { size: right.size, fill: right.fill, anchor: 'end' })
@@ -85,10 +87,10 @@ function pair(v: MeterInput, role: FaderRole): string {
 	const second = role === 'bottom' || role === 'right'
 	let b: string
 	if (vertical) {
-		b = nameBlock(v.name, { x: 72, top: 4, width: 128, height: 30, maxLines: 1, size: 24, minSize: 13 })
-		b += bigNumber(72, 86, v.faderText, 40, 132, v.muted ? MUTED_RED : WHITE)
-		b += thinBars(52, 102, 12, 160, 10, v.leftDb, v.rightDb, v.muted, 'bp', true) + marks(92, 102, 160, true, KEY)
-		b += v.muted ? mutedText(72, 276, 20) : name(v.levelText, 72, 276, 20, 128)
+		b = nameBlock(v.name, { x: 72, top: 2, width: 132, height: 30, maxLines: 1, size: 26, minSize: 13 })
+		b += bigNumber(72, 80, v.faderText, 44, 136, v.muted ? MUTED_RED : WHITE)
+		b += thinBars(40, 98, 20, 168, 10, v.leftDb, v.rightDb, v.muted, 'bp', true) + marks(96, 98, 168, true, KEY, 12)
+		b += v.muted ? mutedText(72, 278, 22) : name(v.levelText, 72, 278, 22, 136)
 	} else {
 		b = nameBlock(v.name, { x: 72, top: 4, width: 132, height: 38, maxLines: 1, size: 32, minSize: 14 })
 		b += v.muted ? mutedText(72, 60, 24) : name(v.levelText, 72, 60, 24, 132, 'middle', GREY)

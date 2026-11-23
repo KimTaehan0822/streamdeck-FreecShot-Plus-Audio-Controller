@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { sliderPos, stepDb, clampSetDb, dbText, balanceText } from '../dist/obs/volume.js'
-import { levelsFor, MeterTracker } from '../dist/obs/meter-state.js'
+import { levelsFor, rmsFor, MeterTracker } from '../dist/obs/meter-state.js'
 
 const near = (a, b, eps = 1e-3) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`)
 const db = (mul) => 20 * Math.log10(mul)
@@ -63,4 +63,14 @@ test('steps keep a boosted or very low volume from jumping', () => {
 	assert.equal(stepDb(6, -1), 5) // down steps normally from the boost
 	assert.equal(stepDb(-80, 1), -60) // below the floor: up goes to the floor, not silence
 	assert.equal(stepDb(-80, -1), -Infinity)
+})
+
+test('rmsFor reads the magnitude (RMS) OBS sends, in dB', () => {
+	const r = rmsFor([[0.5, 0.9, 0.9], [0.25, 0.5, 0.5]])
+	assert.ok(Math.abs(r.left - -6.02) < 0.01 && Math.abs(r.right - -12.04) < 0.01)
+	const mono = rmsFor([[0.5, 1, 1]])
+	assert.equal(mono.right, mono.left)
+	assert.deepEqual(rmsFor([]), { left: -Infinity, right: -Infinity })
+	// Muted: OBS sends 0 for magnitude, so the VU needle rests.
+	assert.equal(rmsFor([[0, 0, 0.8]]).left, -Infinity)
 })

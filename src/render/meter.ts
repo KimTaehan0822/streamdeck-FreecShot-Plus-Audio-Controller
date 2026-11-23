@@ -13,6 +13,8 @@ export interface ObsMeterView {
 	name: string
 	volumeDb: number
 	levels: MeterDisplay
+	/** RMS per side (dB), which only the VU needle design draws. */
+	rms: { left: number; right: number }
 	muted: boolean
 	/** muted and the volume changed within the last 700 ms */
 	peek: boolean

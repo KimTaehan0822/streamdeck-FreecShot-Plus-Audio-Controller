@@ -22,6 +22,12 @@ export function levelsFor(raw: number[][], muted: boolean, volumeMul: number): M
 	return { left, right, combined: peaks.length ? Math.max(...peaks) : -Infinity }
 }
 
+/** RMS per side (dB) from the magnitude OBS sends (0 while muted, so the VU needle rests); mono reads the same on both. */
+export function rmsFor(raw: number[][]): { left: number; right: number } {
+	const left = toDb(raw[0]?.[0] ?? 0)
+	return { left, right: raw.length > 1 ? toDb(raw[1][0] ?? 0) : left }
+}
+
 // OBS defaults: Settings → Audio → Meter decay rate "Fast" (VOLUME_METER_DECAY_FAST, 40 dB / 1.7 s) and a 20 s peak hold.
 export const DECAY_DB_PER_S = 23.53
 export const HOLD_MS = 20_000

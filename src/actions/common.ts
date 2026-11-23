@@ -61,6 +61,7 @@ export abstract class SourceAction extends ObsAction<JsonObject> {
 			name: nameOf(this.connection, s),
 			volumeDb: i?.volumeDb ?? -Infinity,
 			levels: i ? i.meter.display(Date.now()) : SILENT,
+			rms: i?.rms ?? { left: -Infinity, right: -Infinity },
 			muted,
 			peek: muted && !!i && faderAdjustedRecently(i.uuid),
 			...meterOpts(s),

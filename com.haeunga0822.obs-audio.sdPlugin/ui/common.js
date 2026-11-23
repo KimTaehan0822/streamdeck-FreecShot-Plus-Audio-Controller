@@ -25,16 +25,50 @@ const globalBlock = () => `
 ${FREECSHOT ? `<sdpi-item label=""><button type="button" class="tb-btn" id="fc-setup">${tr('autoSetup')}</button></sdpi-item><div class="hint" id="fc-result" role="status"></div>` : ''}
 <div class="hint">${tr(FREECSHOT ? 'freecshotHint' : 'obsHint')}</div>
 </details>
-<details class="connection"><summary>${tr('meterRange')}</summary>
+<details class="connection"><summary>${tr('meterDesign')}</summary>
+<sdpi-item label="${tr('dials')}"><sdpi-select setting="meterDesign" global default="plugin">${designOptions()}</sdpi-select></sdpi-item>
+<sdpi-item label="${tr('buttons')}"><sdpi-select setting="meterDesignKey" global default="same"><option value="same">${tr('sameAsDials')}</option>${designOptions()}</sdpi-select></sdpi-item>
+<sdpi-item class="vu-only" label="${tr('vuReference')}"><sdpi-select setting="vuReference" global default="-18">${[-14, -18, -20].map((d) => `<option value="${d}">${d} dBFS</option>`).join('')}</sdpi-select></sdpi-item>
+</details>
+<details class="connection plugin-only"><summary>${tr('meterRange')}</summary>
 <sdpi-item label="${tr('meterStart')}"><sdpi-select setting="meterFloor" global default="-60">${[-60, -50, -40, -30].map((d) => `<option value="${d}">${d} dB</option>`).join('')}</sdpi-select></sdpi-item>
 </details>
 <details class="connection"><summary>${tr('language')}</summary>
 <sdpi-item label="${tr('language')}"><sdpi-select setting="language" global default="en"><option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option></sdpi-select></sdpi-item>
 </details>`
 
-/** Draws the connection, meter range and language blocks into every [data-global] slot. */
+// Meter designs copied from the TotalMix plugin, in its order; 'plugin' is this plugin's own look.
+const DESIGNS = [['plugin', 'designPlugin'], ['classic', 'designClassic'], ['modern', 'designModern'], ['topping', 'designTopping'], ['big', 'designBig'], ['vu', 'designVu']]
+const designOptions = () => DESIGNS.map(([v, k]) => `<option value="${v}">${tr(k)}</option>`).join('')
+
+// The chosen designs (global). Meter style and meter range only change the plugin's own look, so they hide when no key
+// they reach uses it; the VU reference shows only while a VU needle is picked. Fields marked data-design="dial" or "key"
+// (the action's own Meter style) follow the design of that surface.
+const meterChoice = { dial: 'plugin', key: 'same' }
+function showMeterFields() {
+	const dial = DESIGNS.some(([v]) => v === meterChoice.dial) ? meterChoice.dial : 'plugin'
+	const key = meterChoice.key === 'same' || !meterChoice.key ? dial : DESIGNS.some(([v]) => v === meterChoice.key) ? meterChoice.key : 'plugin'
+	const design = { dial, key }
+	for (const el of document.querySelectorAll('.vu-only')) el.style.display = dial === 'vu' || key === 'vu' ? '' : 'none'
+	for (const el of document.querySelectorAll('.plugin-only')) el.style.display = dial === 'plugin' || key === 'plugin' ? '' : 'none'
+	for (const el of document.querySelectorAll('[data-design]')) el.style.display = design[el.dataset.design] === 'plugin' ? '' : 'none'
+}
+SDPIComponents.streamDeckClient.getGlobalSettings().then((g) => {
+	meterChoice.dial = g?.meterDesign ?? 'plugin'
+	meterChoice.key = g?.meterDesignKey ?? 'same'
+	showMeterFields()
+})
+
+/** Draws the connection, meter design, meter range and language blocks into every [data-global] slot. */
 function renderGlobal() {
 	for (const slot of document.querySelectorAll('[data-global]')) slot.innerHTML = globalBlock()
+	for (const [setting, part] of [['meterDesign', 'dial'], ['meterDesignKey', 'key']])
+		for (const el of document.querySelectorAll(`[setting="${setting}"]`))
+			el.addEventListener('valuechange', (e) => {
+				meterChoice[part] = e.target.value
+				showMeterFields()
+			})
+	showMeterFields()
 	if (FREECSHOT) wireAutoSetup()
 }
 

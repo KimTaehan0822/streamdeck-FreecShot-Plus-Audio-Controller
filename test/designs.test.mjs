@@ -89,3 +89,9 @@ test('the dial and button designs follow the global settings', async () => {
 		setMeterDesigns('plugin', 'same', undefined)
 	}
 })
+
+test('volume texts that fit are not cut short (designs measure text like TotalMix)', () => {
+	assert.ok(!SHARED_DESIGNS.topping.key(keyInput()).includes('…'))
+	assert.ok(!SHARED_DESIGNS.big.pair(input(), 'right').includes('…'))
+	assert.ok(!SHARED_DESIGNS.topping.strip(input()).includes('…'))
+})

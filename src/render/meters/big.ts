@@ -1,6 +1,7 @@
 // "Big number": thin large fader value and two slim L/R bars, after the TOPPING app's volume screen (mockup approved 2026-11-16).
 import { t } from '../../i18n.js'
-import { KEY, escapeXml, fitSize, fitText, frame, plainText, textWidth } from '../svg.js'
+import { KEY, escapeXml, frame, plainText } from '../svg.js'
+import { fitSize, fitText, textWidth } from './measure.js'
 import { nameBlock } from './text.js'
 import { MUTED_RED, base, clamp01, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 

@@ -134,8 +134,8 @@
 			let html = `<sdpi-item label="${tr('source')}"><sdpi-select setting="inputUuid" datasource="getInputs" hot-reload placeholder="${tr('selectSource')}"></sdpi-select></sdpi-item>`
 			html += text('displayName', tr('displayName'), tr('displayNameHint'))
 			if (METER.includes(kind)) {
-				html += select('meterStyle', tr('meterStyle'), { standard: tr('standard'), wide: tr('wide') }, 'standard')
-				html += hint(tr('meterHint'))
+				// Meter style changes only the plugin's own look; it hides while this key draws another design.
+				html += `<div data-design="${kind === 'vu-dial' ? 'dial' : 'key'}">${select('meterStyle', tr('meterStyle'), { standard: tr('standard'), wide: tr('wide') }, 'standard')}${hint(tr('meterHint'))}</div>`
 				// Only the dial draws L/R numbers; faders and keys show one combined value.
 				if (kind === 'vu-dial') html += select('channels', tr('levelText'), { lr: tr('lr'), combined: tr('combined') }, 'lr')
 			}

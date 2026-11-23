@@ -1,6 +1,7 @@
 // TOPPING E2x2 OTG plugin look, ported from streamdeck-topping-e2x2 (src/render/meter.ts, keys.ts, theme.ts, protocol/meter.ts).
 import { t } from '../../i18n.js'
-import { KEY, fitSize, fitText, frame, plainText } from '../svg.js'
+import { KEY, frame, plainText } from '../svg.js'
+import { fitSize, fitText } from './measure.js'
 import { base, clamp01, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
 const BG = '#1F1F1F'

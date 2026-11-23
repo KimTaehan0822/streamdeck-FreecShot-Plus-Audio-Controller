@@ -1,7 +1,8 @@
 // "Mix Studio Classic" and "Mix Studio Modern": TotalMix FX's old and new meter looks, ported from the TotalMix plugin
 // (src/render/meter.ts, where they are styles of its own meter) into the shared MeterDesign form. Values arrive in dB.
 import { t } from '../../i18n.js'
-import { KEY, NAME_WIDTH, fitSize, fitText, frame, plainText } from '../svg.js'
+import { KEY, NAME_WIDTH, frame, plainText } from '../svg.js'
+import { fitSize, fitText } from './measure.js'
 import { base, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 
 type Look = 'classic' | 'modern'

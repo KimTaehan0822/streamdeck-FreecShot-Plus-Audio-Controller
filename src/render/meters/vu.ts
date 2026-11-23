@@ -1,6 +1,7 @@
 // "VU needle": amber analogue VU face, needle on the louder of L and R (mockup approved 2026-11-16).
 import { t } from '../../i18n.js'
-import { KEY, fitSize, fitText, frame, plainText } from '../svg.js'
+import { KEY, frame, plainText } from '../svg.js'
+import { fitSize, fitText } from './measure.js'
 import { nameBlock } from './text.js'
 import { MUTED_RED, base, n, safeDb, type FaderRole, type MeterDesign, type MeterInput, type MeterKeyInput } from './types.js'
 

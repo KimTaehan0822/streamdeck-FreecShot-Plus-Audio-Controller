@@ -1,5 +1,6 @@
 // Name wrapping ported from the OBS audio plugin (src/render/text.ts), on this plugin's text measurements.
-import { fitText, plainText, textWidth } from '../svg.js'
+import { plainText } from '../svg.js'
+import { fitText, textWidth } from './measure.js'
 
 export const LINE_HEIGHT = 1.15
 const CJK = /[ᄀ-ᇿ⺀-꓏가-힣豈-﫿]/

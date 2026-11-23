@@ -137,13 +137,13 @@ const text = (t: string, x: number, cy: number, size: number, maxWidth: number, 
 	return plainText(x, base(cy, s), fitText(t, s, maxWidth + 4), { size: s, fill })
 }
 
-/** The Fader key look stretched sideways: name on top, a wide VU face, the fader value (MUTED while muted) under it. */
+/** The Fader key look stretched sideways: name on top, a wide VU face, the fader value under it (red while muted). */
 function strip(v: MeterInput): string {
 	const right = v.badge ? 196 - fitText(v.badge.text, 13, 50).length * 8 - 6 : 196
 	let b = text(v.name, (4 + right) / 2, 10, 16, right - 8)
 	if (v.badge) b += plainText(196, base(10, 13), fitText(v.badge.text, 13, 50), { size: 13, fill: v.badge.fill, anchor: 'end' })
 	b += face(6, 20, 188, 62, loud(v.leftDb, v.rightDb), v.muted, 'vs', { cx: 100, pivot: 130, r: 82, half: 48, vu: [100, 68] })[0]
-	b += v.muted && !v.peek ? text(t('muted'), 100, 91, 16, 190, MUTED_RED) : text(v.faderText, 100, 91, 16, 190)
+	b += text(v.faderText, 100, 91, 16, 190, v.muted ? MUTED_RED : WHITE)
 	return frame(200, 100, b, v.overlay)
 }
 
@@ -159,13 +159,13 @@ function pair(v: MeterInput, role: FaderRole): string {
 	let b: string
 	if (vertical) {
 		b = nameBlock(v.name, { x: 72, top: 4, width: 128, height: 32, maxLines: 1, size: 24, minSize: 13 })
-		if (!v.muted) b += text(v.faderText, 72, 50, 24, 132)
+		b += text(v.faderText, 72, 50, 24, 132, v.muted ? MUTED_RED : WHITE)
 		b += face(6, 64, 132, 190, db, v.muted, 'vp', { cx: 72, pivot: 250, r: 150, half: 18, vu: [72, 214] })[0]
 		// TotalMix's own peak level: the needle is an estimate, the number stays the real measured value.
-		b += v.muted ? (v.peek ? text(v.faderText, 72, 272, 20, 128) : text(t('muted'), 72, 272, 20, 128, MUTED_RED)) : text(v.levelText, 72, 272, 20, 128)
+		b += v.muted ? text(t('muted'), 72, 272, 20, 128, MUTED_RED) : text(v.levelText, 72, 272, 20, 128)
 	} else {
 		b = nameBlock(v.name, { x: 72, top: 7, width: 124, height: 24, maxLines: 1, size: 20, minSize: 12 })
-		b += v.muted && !v.peek ? text(t('muted'), 216, 19, 20, 124, MUTED_RED) : text(v.faderText, 216, 19, 20, 124)
+		b += text(v.faderText, 216, 19, 20, 124, v.muted ? MUTED_RED : WHITE)
 		b += face(6, 34, 276, 104, db, v.muted, 'vp', { cx: 144, pivot: 170, r: 110, half: 48, vu: [70, 126] })[0]
 	}
 	const shift = second ? (vertical ? `translate(0 -${KEY})` : `translate(-${KEY} 0)`) : ''
@@ -175,7 +175,7 @@ function pair(v: MeterInput, role: FaderRole): string {
 function key(v: MeterKeyInput): string {
 	let b = text(v.title, 72, 18, 20, 128)
 	b += face(8, 32, 128, 82, loud(v.meter.leftDb, v.meter.rightDb), v.meter.muted, 'vk')[0]
-	b += v.meter.muted ? text(t('muted'), 72, 130, 18, 128, MUTED_RED) : text(v.value, 72, 130, 18, 128)
+	b += text(v.value, 72, 130, 18, 128, v.meter.muted ? MUTED_RED : WHITE)
 	return frame(KEY, KEY, b, v.overlay)
 }
 

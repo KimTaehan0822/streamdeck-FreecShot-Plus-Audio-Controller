@@ -137,11 +137,10 @@ function strip(look: Look, v: MeterInput): string {
 	const nameSize = fitSize(v.name, 24, nameRight - 8, 12)
 	body += plainText(n((4 + nameRight) / 2), base(14, nameSize), fitText(v.name, nameSize, nameRight - 4), { size: nameSize, fill: WHITE })
 	if (v.badge && badge) body += plainText(196, base(14, 15), badge, { size: 15, fill: v.badge.fill, anchor: 'end' })
-	if (!v.muted) {
-		body += plainText(4, base(82, 19), fitText(v.levelText, 19, 96), { size: 19, fill: WHITE, anchor: 'start' })
-		body += plainText(196, base(82, 19), fitText(v.faderText, 19, 125), { size: 19, fill: WHITE, anchor: 'end' })
-	} else if (v.peek) body += plainText(100, base(82, 19), fitText(v.faderText, 19, 192), { size: 19, fill: WHITE })
-	else body += plainText(100, base(82, 19), t('muted'), { size: 19, fill: RED })
+	// While muted, MUTED takes the level's place and the volume stays, in red.
+	const [left, leftFill] = v.muted ? [t('muted'), RED] : [v.levelText, WHITE]
+	body += plainText(4, base(82, 19), fitText(left, 19, 96), { size: 19, fill: leftFill, anchor: 'start' })
+	body += plainText(196, base(82, 19), fitText(v.faderText, 19, 125), { size: 19, fill: v.muted ? RED : WHITE, anchor: 'end' })
 	return frame(200, 100, body, v.overlay)
 }
 
@@ -177,19 +176,19 @@ function pair(look: Look, v: MeterInput, role: FaderRole): string {
 	for (const [kind, cy] of rows) {
 		// Long names shrink (down to 7 units) to fit the key rather than being cut.
 		if (kind === 'name') body += text(v.name, cy, WHITE, KEY - 8, fitSize(v.name, size, NAME_WIDTH, 7 * u))
-		else if (!v.muted) body += text(kind === 'value' ? v.faderText : v.levelText, cy)
+		// While muted the volume stays, in red, and MUTED takes the level's row.
+		else if (kind === 'value') body += text(v.faderText, cy, v.muted ? RED : WHITE)
+		else body += v.muted ? text(t('muted'), cy, RED) : text(v.levelText, cy)
 	}
-	// MUTED (or briefly the volume) sits in the bottom row of the bottom / right key
-	if (v.muted && vertical !== high) body += v.peek ? text(v.faderText, 83) : text(t('muted'), 83, RED)
 	return frame(KEY, KEY, body, v.overlay)
 }
 
-/** TotalMix's value key: title, value (MUTED while muted), the strip's bars and fader line fitted to 124x14. */
+/** TotalMix's value key: title, value (red while muted), the strip's bars and fader line fitted to 124x14. */
 function key(look: Look, v: MeterKeyInput): string {
 	const m = v.meter
 	const titleSize = fitSize(v.title, 26, NAME_WIDTH, 10)
 	let body = plainText(72, 40, fitText(v.title, titleSize), { size: titleSize, fill: WHITE })
-	const [value, fill] = m.muted ? [t('muted'), RED] : [v.value, WHITE]
+	const [value, fill] = [v.value, m.muted ? RED : WHITE]
 	body += plainText(72, 90, fitText(value, 26), { size: 26, fill })
 	const s: Scale = { sx: 1, sy: 1, vertical: false, min: 0, max: 1 }
 	const l: Box = { x: 10, y: 108, w: 124, h: 6 }

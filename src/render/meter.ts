@@ -155,10 +155,8 @@ function scaleMarks(b: Box, vertical: boolean, size: number, seam?: number): str
 const obsMeter = (b: Box, vertical: boolean, v: KeyMeterView, width: number, size: number, seam?: number) =>
 	meterWithFader(b, vertical, v, 1, width) + scaleMarks(b, vertical, size, seam)
 
-/** Volume text, MUTED while muted, the volume again during a peek. */
-function volumeLabel(v: Pick<ObsMeterView, 'muted' | 'peek' | 'volumeDb'>): { text: string; fill: string } {
-	return v.muted && !v.peek ? { text: t('muted'), fill: RED } : { text: dbText(v.volumeDb), fill: WHITE }
-}
+/** While muted the volume stays in its place, in red; MUTED takes the level's place (the level is hidden then). */
+const volumeFill = (v: Pick<ObsMeterView, 'muted'>) => (v.muted ? RED : WHITE)
 
 const levelLine = (v: KeyMeterView) =>
 	v.channels === 'combined' ? `${levelText(v.levels.combined)} dB` : `L ${levelText(v.levels.left)}  R ${levelText(v.levels.right)}`
@@ -173,17 +171,13 @@ const base = (cy: number, size: number) => n(cy + size * 0.35)
 export function renderVuStrip(v: ObsMeterView): string {
 	let body = nameBlock(v.name, { x: 100, top: 1, width: 192, height: 28, maxLines: 2, size: 20, minSize: 11 })
 	body += obsMeter({ x: 12, y: 31, w: 176, h: 19 }, false, v, 3, 11)
-	if (!v.muted) {
-		const l = v.levels
-		body +=
-			v.channels === 'combined'
-				? plainText(4, base(82, 19), `${levelText(l.combined)} dB`, { size: 19, fill: WHITE, anchor: 'start' })
-				: plainText(4, base(82, 19), `L ${levelText(l.left)} R ${levelText(l.right)}`, { size: 16, fill: WHITE, anchor: 'start' })
-		body += plainText(196, base(82, 19), dbText(v.volumeDb), { size: 19, fill: WHITE, anchor: 'end' })
-	} else {
-		const label = volumeLabel(v)
-		body += plainText(100, base(82, 19), label.text, { size: 19, fill: label.fill })
-	}
+	const l = v.levels
+	body += v.muted
+		? plainText(4, base(82, 19), fitText(t('muted'), 19, 96), { size: 19, fill: RED, anchor: 'start' })
+		: v.channels === 'combined'
+			? plainText(4, base(82, 19), `${levelText(l.combined)} dB`, { size: 19, fill: WHITE, anchor: 'start' })
+			: plainText(4, base(82, 19), `L ${levelText(l.left)} R ${levelText(l.right)}`, { size: 16, fill: WHITE, anchor: 'start' })
+	body += plainText(196, base(82, 19), dbText(v.volumeDb), { size: 19, fill: volumeFill(v), anchor: 'end' })
 	return frame(200, 100, body, v.overlay)
 }
 
@@ -218,10 +212,10 @@ export function renderButtonFader(v: ObsMeterView, role: FaderRole): string {
 	const row = (t: string, cy: number, fill = WHITE) => plainText(KEY / 2, base(cy * u, size), fitText(t, size, KEY - 4), { size, fill })
 	const volume = dbText(v.volumeDb)
 	const level = `${levelText(v.levels.combined)} dB`
-	const label = volumeLabel(v)
+	const levelRow = () => (v.muted ? row(t('muted'), 83, RED) : row(level, 83))
 	let text = second ? '' : nameBlock(v.name, nameBox)
-	if (vertical) text += second ? (v.muted ? row(label.text, 83, label.fill) : row(level, 83)) : v.muted ? '' : plainText(KEY / 2, volumeBaseline, fitText(volume, 24, KEY - 16), { size: 24, fill: WHITE })
-	else text += second ? (v.muted ? row(label.text, 83, label.fill) : row(volume, 83)) : v.muted ? '' : row(level, 83)
+	if (vertical) text += second ? levelRow() : plainText(KEY / 2, volumeBaseline, fitText(volume, 24, KEY - 16), { size: 24, fill: volumeFill(v) })
+	else text += second ? row(volume, 83, volumeFill(v)) : levelRow()
 	const shift = second ? (vertical ? `translate(0 -${KEY})` : `translate(-${KEY} 0)`) : ''
 	return frame(KEY, KEY, (shift ? `<g transform="${shift}">${body}</g>` : body) + text, v.overlay)
 }

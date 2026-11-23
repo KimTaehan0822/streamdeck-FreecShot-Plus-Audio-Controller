@@ -78,10 +78,15 @@ test('muted strip is grey with MUTED', () => {
 	out('vu-muted', svg)
 })
 
-test('peek shows the dB instead of MUTED', () => {
-	const svg = renderVuStrip(view({ muted: true, peek: true }))
-	assert.ok(!svg.includes('MUTED'))
-	assert.ok(svg.includes('-6.0 dB'))
+test('muted: the volume stays in its place in red, MUTED takes the level spot', () => {
+	const RED = 'fill="rgb\\(255,57,31\\)"'
+	const strip = renderVuStrip(view({ muted: true }))
+	assert.match(strip, new RegExp(`<text x="196" y="88.65"[^>]*${RED}>-6.0 dB<`))
+	assert.match(strip, new RegExp(`<text x="4" y="88.65"[^>]*${RED}>MUTED<`))
+	assert.match(renderButtonFader(view({ muted: true }), 'top'), new RegExp(`${RED}>-6.0 dB<`))
+	assert.match(renderButtonFader(view({ muted: true }), 'right'), new RegExp(`${RED}>-6.0 dB<`))
+	assert.match(renderButtonFader(view({ muted: true }), 'left'), new RegExp(`${RED}>MUTED<`))
+	assert.match(renderVolumeKey({ name: 'Mic', volumeDb: -6, muted: true, peek: false, meter: { ...meter, muted: true }, overlay: 'none' }), new RegExp(`${RED}>-6.0 dB<`))
 })
 
 test('combined mode keeps both bars, only the level text changes', () => {
@@ -116,8 +121,8 @@ test('dial uses the TotalMix layout: centred name, level bottom-left, volume bot
 	assert.match(renderVuStrip(view({ channels: 'combined' })), /<text x="4" y="88.65"[^>]*font-size="19"[^>]*>-14.0 dB</)
 	assert.match(svg, /<text x="196" y="88.65"[^>]*text-anchor="end"[^>]*>-6.0 dB</)
 	const muted = renderVuStrip(view({ muted: true }))
-	assert.match(muted, /<text x="100" y="88.65"[^>]*>MUTED</)
-	assert.ok(!muted.includes('-6.0 dB') && !muted.includes('L -14.0'))
+	assert.match(muted, /<text x="4" y="88.65"[^>]*>MUTED</)
+	assert.ok(muted.includes('-6.0 dB') && !muted.includes('L -14.0'))
 })
 
 test('meters have an OBS-style dB scale next to thin L/R bars on the dial, both faders and the keys', () => {
@@ -139,7 +144,7 @@ test('button faders use the TotalMix layout: big centred name and volume on the 
 	assert.match(renderButtonFader(view(), 'right'), /<text x="72" y="129.6"[^>]*>-6.0 dB</)
 	assert.match(renderButtonFader(view(), 'left'), /<text x="72" y="129.6"[^>]*>-14.0 dB</)
 	const mutedTop = renderButtonFader(view({ muted: true }), 'top')
-	assert.ok(!mutedTop.includes('-6.0 dB') && !mutedTop.includes('MUTED'))
+	assert.ok(mutedTop.includes('-6.0 dB') && !mutedTop.includes('MUTED'))
 	assert.match(renderButtonFader(view({ muted: true }), 'bottom'), /<text x="72" y="129.6"[^>]*>MUTED</)
 })
 

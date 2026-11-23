@@ -47,9 +47,11 @@ test('MUTED is drawn in the plugin language', () => {
 	setLanguage('ko')
 	try {
 		for (const name of NAMES) {
-			const strip = SHARED_DESIGNS[name].strip(input({ muted: true }))
-			assert.ok(strip.includes('음소거'), name)
-			assert.ok(!strip.includes('MUTED'), name)
+			const d = SHARED_DESIGNS[name]
+			const m = input({ muted: true })
+			const all = d.strip(m) + d.pair(m, 'top') + d.pair(m, 'bottom')
+			assert.ok(all.includes('음소거'), name)
+			assert.ok(!all.includes('MUTED'), name)
 		}
 	} finally {
 		setLanguage('en')
@@ -94,4 +96,24 @@ test('volume texts that fit are not cut short (designs measure text like TotalMi
 	assert.ok(!SHARED_DESIGNS.topping.key(keyInput()).includes('…'))
 	assert.ok(!SHARED_DESIGNS.big.pair(input(), 'right').includes('…'))
 	assert.ok(!SHARED_DESIGNS.topping.strip(input()).includes('…'))
+})
+
+// The <text> elements as [fill, text] (a tspan unit counts as part of its number).
+const texts = (svg) => [...svg.matchAll(/<text[^>]*fill="([^"]+)"[^>]*>([^<]*)/g)].map((m) => [m[1], m[2]])
+const REDS = ['rgb(255,57,31)', '#E5483E']
+const redHas = (svg, word) => texts(svg).some(([fill, t]) => REDS.includes(fill) && t.startsWith(word))
+
+test('muted: every design keeps the volume in red, and shows MUTED where the level would be', () => {
+	const m = input({ muted: true })
+	for (const name of NAMES) {
+		const d = SHARED_DESIGNS[name]
+		assert.ok(redHas(d.strip(m), '-6.0'), `${name} strip volume`)
+		const vertical = d.pair(m, 'top') + d.pair(m, 'bottom')
+		const horizontal = d.pair(m, 'left') + d.pair(m, 'right')
+		assert.ok(redHas(vertical, '-6.0'), `${name} vertical volume`)
+		assert.ok(redHas(horizontal, '-6.0'), `${name} horizontal volume`)
+		assert.ok(redHas(vertical, 'MUTED'), `${name} vertical MUTED`)
+		assert.ok(redHas(d.key(keyInput({ muted: true })), '-6.0'), `${name} key volume`)
+		assert.ok(!(d.strip(m) + vertical + horizontal).includes('-12.0'), `${name} level hidden while muted`)
+	}
 })

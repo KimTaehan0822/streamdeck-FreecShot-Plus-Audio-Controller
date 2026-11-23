@@ -54,8 +54,10 @@ function strip(v: MeterInput): string {
 	const right = v.badge ? { text: fitText(v.badge.text, 15, 60), fill: v.badge.fill, size: 15 } : { text: fitText(v.levelText, 14, 76), fill: GREY, size: 14 }
 	const rightW = textWidth(right.text, right.size)
 	let b = name(v.name, 8, 14, 18, 184 - rightW - 8, 'start', GREY)
+	// While muted, MUTED takes the level's place (a badge keeps it) and the volume stays, in red.
 	if (!v.muted || v.badge) b += plainText(192, base(14, right.size), right.text, { size: right.size, fill: right.fill, anchor: 'end' })
-	b += v.muted && !v.peek ? mutedText(100, 52, 30) : bigNumber(100, 68, v.faderText, 44, 184)
+	else b += plainText(192, base(14, 14), t('muted'), { size: 14, fill: MUTED_RED, anchor: 'end' })
+	b += bigNumber(100, 68, v.faderText, 44, 184, v.muted ? MUTED_RED : WHITE)
 	b += thinBars(10, 82, 180, 4, 3, v.leftDb, v.rightDb, v.muted, 'bs')
 	return frame(200, 100, b, v.overlay)
 }
@@ -84,13 +86,13 @@ function pair(v: MeterInput, role: FaderRole): string {
 	let b: string
 	if (vertical) {
 		b = nameBlock(v.name, { x: 72, top: 4, width: 128, height: 30, maxLines: 1, size: 24, minSize: 13 })
-		if (!v.muted) b += bigNumber(72, 86, v.faderText, 40, 132)
+		b += bigNumber(72, 86, v.faderText, 40, 132, v.muted ? MUTED_RED : WHITE)
 		b += thinBars(52, 102, 12, 160, 10, v.leftDb, v.rightDb, v.muted, 'bp', true) + marks(92, 102, 160, true, KEY)
-		b += v.muted ? (v.peek ? name(v.faderText, 72, 276, 20, 128) : mutedText(72, 276, 20)) : name(v.levelText, 72, 276, 20, 128)
+		b += v.muted ? mutedText(72, 276, 20) : name(v.levelText, 72, 276, 20, 128)
 	} else {
 		b = nameBlock(v.name, { x: 72, top: 4, width: 132, height: 38, maxLines: 1, size: 32, minSize: 14 })
-		if (!v.muted) b += name(v.levelText, 72, 60, 24, 132, 'middle', GREY)
-		b += v.muted && !v.peek ? mutedText(216, 46, 34) : bigNumber(216, 66, v.faderText, 58, 136)
+		b += v.muted ? mutedText(72, 60, 24) : name(v.levelText, 72, 60, 24, 132, 'middle', GREY)
+		b += bigNumber(216, 66, v.faderText, 58, 136, v.muted ? MUTED_RED : WHITE)
 		b += thinBars(12, 84, 264, 11, 6, v.leftDb, v.rightDb, v.muted, 'bp') + marks(12, 126, 264, false, KEY, 13)
 	}
 	const shift = second ? (vertical ? `translate(0 -${KEY})` : `translate(-${KEY} 0)`) : ''
@@ -99,7 +101,7 @@ function pair(v: MeterInput, role: FaderRole): string {
 
 function key(v: MeterKeyInput): string {
 	let b = nameBlock(v.title, { x: 72, top: 4, width: 128, height: 50, maxLines: 2, size: 22, minSize: 12 })
-	b += v.meter.muted ? mutedText(72, 76, 30) : bigNumber(72, 92, v.value, 42, 132)
+	b += bigNumber(72, 92, v.value, 42, 132, v.meter.muted ? MUTED_RED : WHITE)
 	b += thinBars(12, 112, 120, 5, 4, v.meter.leftDb, v.meter.rightDb, v.meter.muted, 'bk')
 	return frame(KEY, KEY, b, v.overlay)
 }

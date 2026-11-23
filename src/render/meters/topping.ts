@@ -88,8 +88,10 @@ function strip(v: MeterInput): string {
 		b += `<line x1="${x}" y1="61" x2="${x}" y2="65" stroke="${TICK}" stroke-width="1.5"/>`
 	}
 	if (fader !== undefined) b += cap(12 + 176 * fader, 46, 12, 34, false)
-	if (v.muted) b += v.peek ? plainText(100, base(83, 19), fitText(v.faderText, 19, 192), { size: 19, fill: WHITE }) : plainText(100, base(83, 19), t('muted'), { size: 19, fill: RED })
-	else b += plainText(6, base(83, 19), fitText(v.levelText, 19, 80), { size: 19, fill: DIM, anchor: 'start' }) + plainText(194, base(83, 19), fitText(v.faderText, 19, 125), { size: 19, fill: WHITE, anchor: 'end' })
+	// While muted, MUTED takes the level's place and the volume stays, in red.
+	const [left, leftFill] = v.muted ? [t('muted'), RED] : [v.levelText, DIM]
+	b += plainText(6, base(83, 19), fitText(left, 19, 80), { size: 19, fill: leftFill, anchor: 'start' })
+	b += plainText(194, base(83, 19), fitText(v.faderText, 19, 125), { size: 19, fill: v.muted ? RED : WHITE, anchor: 'end' })
 	return frame(200, 100, b, v.overlay)
 }
 
@@ -141,21 +143,22 @@ function pair(v: MeterInput, role: FaderRole): string {
 		const s = fitSize(t, size, 132, 10)
 		return plainText(72, base(cy, s), fitText(t, s, 136), { size: s, fill })
 	}
-	const level = (cy: number, size: number, fill: string) => (v.muted || v.levelText === '' ? '' : row(v.levelText, cy, size, fill))
-	const muted = (cy: number, size: number) => plainText(72, base(cy, size), t('muted'), { size, fill: RED })
-	if (role === 'top') b = (v.name ? plate(21, 34, plateName(v.name, 21, 24)) : '') + (v.muted ? '' : row(v.faderText, 58, 26, WHITE)) + b
+	// While muted, MUTED takes the level's place and the volume stays, in red.
+	const level = (cy: number, size: number, fill: string) => (v.muted ? row(t('muted'), cy, size, RED) : v.levelText === '' ? '' : row(v.levelText, cy, size, fill))
+	const volumeFill = v.muted ? RED : WHITE
+	if (role === 'top') b = (v.name ? plate(21, 34, plateName(v.name, 21, 24)) : '') + row(v.faderText, 58, 26, volumeFill) + b
 	// Left key: the level sits in the middle of the free space between the name plate (bottom 38) and the fader cap (top 96).
 	else if (role === 'left') b = (v.name ? plate(21, 34, plateName(v.name, 21, 24)) : '') + level(67, 22, DIM) + b
-	else if (role === 'bottom') b += v.muted ? (v.peek ? row(v.faderText, 129, 22, WHITE) : muted(129, 22)) : level(129, 22, DIM)
-	else b += v.muted && !v.peek ? muted(50, 32) : row(v.faderText, 50, 32, WHITE)
+	else if (role === 'bottom') b += level(129, 22, DIM)
+	else b += row(v.faderText, 50, 32, volumeFill)
 	return frame(KEY, KEY, background(KEY, KEY) + b, v.overlay)
 }
 
-/** Value key: name plate, big value (MUTED while muted), L/R bars with the fader cap. */
+/** Value key: name plate, big value (red while muted), L/R bars with the fader cap. */
 function key(v: MeterKeyInput): string {
 	const m = v.meter
 	let b = background(KEY, KEY) + (v.title ? plate(21, 34, plateName(v.title, 21, 24)) : '')
-	const [text, fill] = m.muted ? [t('muted'), RED] : [v.value, WHITE]
+	const [text, fill] = [v.value, m.muted ? RED : WHITE]
 	const size = fitSize(text, 40, 132, 12)
 	b += plainText(72, base(70, size), fitText(text, size, 136), { size, fill })
 	b += bar(10, 98, 124, 12, dbToAxis(safeDb(m.leftDb)), false, m.muted) + bar(10, 114, 124, 12, dbToAxis(safeDb(m.rightDb)), false, m.muted)
